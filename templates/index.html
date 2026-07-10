@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html class="light" lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ZETTA FUNNEL PRO - Leads</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="https://cdn.jsdelivr.net/npm/iconify-icon@2.3.0/dist/iconify-icon.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+* { font-family: 'Inter', sans-serif; }
+body { background-color: #FFFFFF; color: #1A202C; margin: 0; }
+.sidebar {
+  position: fixed; left: 0; top: 0; height: 100%; width: 260px;
+  background: #F8F9FA; border-right: 1px solid #E2E8F0;
+  display: flex; flex-direction: column; z-index: 50;
+}
+.sidebar-brand {
+  display: flex; align-items: center; gap: 10px;
+  padding: 20px 20px 16px;
+}
+.sidebar-brand .logo-img {
+  width: 40px; height: 40px; object-fit: contain;
+  border-radius: 6px;
+}.sidebar-brand h1 { color: #006a63; font-size: 1.15rem; font-weight: 800; margin: 0; line-height: 1.2; }
+.sidebar-brand p { color: #6c7a77; font-size: 0.6rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; margin: 0; }
+.sidebar-nav { list-style: none; padding: 0 8px; margin: 0 0 16px; }
+.sidebar-nav li {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 16px; margin: 2px 0; border-radius: 10px;
+  font-size: 0.85rem; font-weight: 500; color: #4A5568;
+  cursor: default; transition: all 0.15s;
+}
+.sidebar-nav li:hover { background: #EDF2F7; }
+.sidebar-nav li.active {
+  background: #E6FFFA; color: #319795; font-weight: 700;
+  box-shadow: inset 3px 0 0 0 #319795;
+}
+.sidebar-nav li .nav-icon { width: 22px; height: 22px; flex-shrink: 0; }
+.sidebar-nav li.active .nav-icon { color: #319795; }
+.sidebar-nav li a { text-decoration: none; color: inherit; display: flex; align-items: center; gap: 12px; width: 100%; }
+.sidebar-section {
+  font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.08em; color: #A0AEC0; padding: 16px 20px 6px;
+}
+.lead-card {
+  background: #FFFFFF; border: 1px solid #E2E8F0;
+  border-radius: 14px; overflow: hidden;
+  box-shadow: 0 4px 6px -2px rgba(0,0,0,0.04);
+  transition: all 0.2s;
+}
+.lead-card:hover { box-shadow: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -2px rgba(0,0,0,0.04); }
+.lead-avatar {
+  width: 42px; height: 42px; border-radius: 50%;
+  background: linear-gradient(135deg, #4FD1C5 0%, #319795 100%);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.85rem; font-weight: 800; color: white; flex-shrink: 0;
+}
+.lead-name { font-size: 0.95rem; font-weight: 700; color: #1A202C; }
+.lead-meta { font-size: 0.75rem; color: #718096; margin-top: 1px; }
+.stat-card {
+  background: #FFFFFF; border: 1px solid #E2E8F0;
+  border-radius: 16px; padding: 20px;
+  box-shadow: 0 4px 6px -2px rgba(0,0,0,0.04);
+}
+.stat-card .stat-num { font-size: 1.8rem; font-weight: 800; color: #319795; margin: 0; line-height: 1.1; }
+.stat-card .stat-label { font-size: 0.75rem; font-weight: 600; color: #718096; text-transform: uppercase; letter-spacing: 0.05em; margin: 0; }
+.msg-textarea {
+  width: 100%; border: 1.5px solid #CBD5E0; border-radius: 8px;
+  padding: 10px 12px; font-size: 0.85rem; outline: none;
+  background: #FFFFFF; min-height: 80px; resize: vertical;
+  box-sizing: border-box; color: #1A202C; line-height: 1.5;
+}
+.msg-textarea:focus { border-color: #4FD1C5; background: #F0FFFA; }
+.tab-btn {
+  background: #F7FAFC; border: 1px solid #E2E8F0; padding: 8px 18px;
+  font-size: 0.8rem; font-weight: 600; color: #4A5568;
+  cursor: pointer; border-radius: 8px; transition: all 0.15s;
+}
+.tab-btn:hover { background: #EDF2F7; border-color: #CBD5E0; }
+.tab-btn.active { background: #E6FFFA; color: #319795; border-color: #4FD1C5; font-weight: 700; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+.primary-btn {
+  background: #4FD1C5; color: #1A202C; border: none; border-radius: 12px;
+  padding: 10px 20px; font-weight: 700; font-size: 0.85rem;
+  box-shadow: 0 4px 14px 0 rgba(79, 209, 197, 0.4);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+}
+.primary-btn:hover {
+  transform: translateY(-2px); background: #38B2AC;
+  box-shadow: 0 6px 20px 0 rgba(79, 209, 197, 0.6);
+}
+.primary-btn:active { transform: scale(0.95); }
+.secondary-btn {
+  background: #EDF2F7; color: #4A5568; border: none; border-radius: 8px;
+  padding: 6px 14px; font-weight: 600; font-size: 0.78rem;
+  cursor: pointer; transition: all 0.15s;
+}
+.secondary-btn:hover { background: #E2E8F0; }
+.site-link { font-size:0.78rem; color:#319795; font-weight:600; text-decoration:none; }
+.site-link:hover { color: #38B2AC; text-decoration: underline; }
+header.scrolled { box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<div class="flex" style="min-height: 100vh;">
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <img src="/uploads/logo.png" alt="ZETTA" class="logo-img">
+    <div>
+      <h1>ZETTA</h1>
+      <p>Funnel Pro</p>
+    </div>
+  </div>
+  <div class="sidebar-section">Menu</div>
+  <ul class="sidebar-nav">
+    <li><a href="/dashboard"><iconify-icon icon="heroicons:rectangle-group" class="nav-icon"></iconify-icon> Dashboard</a></li>
+    <li><a href="/funnels"><iconify-icon icon="heroicons:funnel" class="nav-icon"></iconify-icon> Funnels</a></li>
+    <li class="active"><iconify-icon icon="heroicons:users" class="nav-icon"></iconify-icon> Leads</li>
+    <li><a href="/automations"><iconify-icon icon="heroicons:bolt" class="nav-icon"></iconify-icon> Automations</a></li>
+    <li><a href="/scraper"><iconify-icon icon="heroicons:magnifying-glass" class="nav-icon"></iconify-icon> Capturar Leads</a></li>
+    <li><a href="/analytics"><iconify-icon icon="heroicons:chart-bar" class="nav-icon"></iconify-icon> Analytics</a></li>
+    <li><a href="/strategy"><iconify-icon icon="heroicons:light-bulb" class="nav-icon"></iconify-icon> Estratégia</a></li>
+    <li><a href="/contratos"><iconify-icon icon="heroicons:document-text" class="nav-icon"></iconify-icon> Gerador de Contratos</a></li>
+    <li><a href="/settings"><iconify-icon icon="heroicons:cog-6-tooth" class="nav-icon"></iconify-icon> Configurações</a></li>
+  </ul>
+  <div class="sidebar-section">Conta</div>
+  <div style="padding: 0 16px;">
+    <a href="/logout" style="width:100%; font-size:0.8rem; padding:10px; background:#EDF2F7; color:#4A5568; border:none; border-radius:12px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:8px; text-decoration:none;">
+      <iconify-icon icon="heroicons:arrow-right-on-rectangle" style="width:16px;height:16px;"></iconify-icon> Sair
+    </a>
+  </div>
+</aside>
+
+<!-- Main -->
+<main style="margin-left:260px; flex:1; background:#FFFFFF; min-height:100vh;">
+
+  <header style="height:64px; border-bottom:1px solid #E2E8F0; padding:0 32px; display:flex; align-items:center; justify-content:space-between; background:rgba(255,255,255,0.9); position:sticky; top:0; z-index:40;">
+    <div style="display:flex; align-items:center; gap:16px;">
+      <iconify-icon icon="heroicons:users" style="width:22px;height:22px;color:#319795;"></iconify-icon>
+      <h2 style="font-size:1.2rem; font-weight:700; color:#1A202C; margin:0;">Leads</h2>
+    </div>
+    <div style="display:flex;align-items:center;gap:20px;">
+      <div style="display:flex;align-items:center;gap:6px; background:#F7FAFC; border:1px solid #E2E8F0; border-radius:8px; padding:6px 12px;">
+        <iconify-icon icon="heroicons:magnifying-glass" style="width:16px;height:16px;color:#A0AEC0;"></iconify-icon>
+        <input type="text" placeholder="Buscar lead..." style="border:none;outline:none;background:transparent;font-size:0.85rem;width:160px;color:#1A202C;" id="search-input"/>
+      </div>
+      <iconify-icon icon="heroicons:bell" style="width:20px;height:20px;color:#A0AEC0;cursor:pointer;"></iconify-icon>
+      <iconify-icon icon="heroicons:question-mark-circle" style="width:20px;height:20px;color:#A0AEC0;cursor:pointer;"></iconify-icon>
+    </div>
+  </header>
+
+  <div style="padding:24px 32px; max-width:1280px; margin:0 auto;">
+
+    {% if not leads %}
+    <!-- Empty state -->
+    <div style="text-align:center; padding:80px 24px; border:2px dashed #E2E8F0; border-radius:16px; background:#F7FAFC;">
+      <iconify-icon icon="heroicons:folder-open" style="width:48px;height:48px;color:#A0AEC0;margin-bottom:16px;"></iconify-icon>
+      <h3 style="font-size:1.2rem; font-weight:700; color:#1A202C; margin:0 0 8px;">Nenhum lead importado</h3>
+      <p style="font-size:0.9rem; color:#718096; margin:0 0 20px;">
+        Faça upload de um arquivo CSV ou use o Scraper para capturar leads do Google Maps.
+      </p>
+      <div style="display:flex; gap:12px; justify-content:center;">
+        <a href="/scraper" class="primary-btn" style="text-decoration:none;">
+          <iconify-icon icon="heroicons:magnifying-glass" style="width:18px;height:18px;"></iconify-icon> Capturar do Maps
+        </a>
+      </div>
+    </div>
+
+    {% else %}
+
+    <!-- Info banner -->
+    {% if colunas %}
+    <div style="background:#E6FFFA; border-left:4px solid #4FD1C5; border-radius:8px; padding:10px 16px; display:flex; align-items:center; gap:10px; margin-bottom:20px;">
+      <iconify-icon icon="heroicons:information-circle" style="width:18px;height:18px;color:#319795;flex-shrink:0;"></iconify-icon>
+      <span style="font-size:0.8rem; color:#1A202C;">Leads importados com sucesso! Clique nas abas para ver as mensagens e disparar WhatsApp.</span>
+    </div>
+    {% endif %}
+
+    <!-- Stats row -->
+    <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:24px;">
+      <div class="stat-card">
+        <p class="stat-label">Total de Leads</p>
+        <p class="stat-num">{{ stats.total }}</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-label">Com Telefone</p>
+        <p class="stat-num">{{ stats.com_telefone }}</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-label">Segmentos</p>
+        <p class="stat-num">{{ stats.segmentos }}</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-label">Com Site</p>
+        <p class="stat-num">{{ stats.com_site }}</p>
+      </div>
+    </div>
+
+    <!-- Column selector (only on POST) -->
+    {% if colunas %}
+    <div style="padding:12px 16px; background:#FFFFFF; border:1px solid #E2E8F0; border-radius:12px; margin-bottom:20px; display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+      <span style="font-size:0.75rem; font-weight:600; color:#4A5568;">Coluna Nome:</span>
+      <select name="col_nome" style="font-size:0.8rem; border:1px solid #E2E8F0; border-radius:8px; padding:6px; background:white;">
+        {% for col in colunas %}<option value="{{ col }}" {% if col == mapeamento.col_nome %}selected{% endif %}>{{ col }}</option>{% endfor %}
+      </select>
+      <span style="font-size:0.75rem; font-weight:600; color:#4A5568;">Telefone:</span>
+      <select name="col_telefone" style="font-size:0.8rem; border:1px solid #E2E8F0; border-radius:8px; padding:6px; background:white;">
+        {% for col in colunas %}<option value="{{ col }}" {% if col == mapeamento.col_telefone %}selected{% endif %}>{{ col }}</option>{% endfor %}
+      </select>
+      <span style="font-size:0.75rem; font-weight:600; color:#4A5568;">Segmento:</span>
+      <select name="col_segmento" style="font-size:0.8rem; border:1px solid #E2E8F0; border-radius:8px; padding:6px; background:white;">
+        {% for col in colunas %}<option value="{{ col }}" {% if col == mapeamento.col_segmento %}selected{% endif %}>{{ col }}</option>{% endfor %}
+      </select>
+    </div>
+    {% endif %}
+
+    <!-- Lead cards -->
+    {% for lead in leads[:limite_exibicao] %}
+    <div class="lead-card" style="margin-bottom:12px;">
+      <div style="padding:16px; display:flex; align-items:flex-start; gap:14px;">
+
+        <!-- Avatar + Name -->
+        <div style="display:flex; align-items:center; gap:12px; min-width:220px; flex-shrink:0;">
+          <div class="lead-avatar">{{ lead.iniciais }}</div>
+          <div>
+            <div class="lead-name">{{ lead.nome }}</div>
+            <div class="lead-meta">{{ lead.segmento }}</div>
+          </div>
+        </div>
+
+        <!-- Tags -->
+        <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap; min-width:140px;">
+          {% if lead.tem_site and lead.url_site %}
+          <span style="font-size:0.7rem; background:#E6FFFA; color:#319795; padding:4px 10px; border-radius:20px; font-weight:600;">
+            <iconify-icon icon="heroicons:globe-alt" style="width:12px;height:12px;display:inline-block;vertical-align:-2px;"></iconify-icon> Possui Website
+          </span>
+          {% else %}
+          <span style="font-size:0.7rem; background:#F7FAFC; color:#A0AEC0; padding:4px 10px; border-radius:20px; font-weight:600;">
+            — Sem Website
+          </span>
+          {% endif %}
+        </div>
+
+        <!-- Message tabs + content -->
+        <div style="flex:1; min-width:0;">
+          <div style="display:flex; gap:4px; margin-bottom:8px; flex-wrap:wrap;">
+            <button class="tab-btn active" onclick="switchTab(this, '{{ loop.index0 }}', 0)">
+              <iconify-icon icon="heroicons:envelope" style="width:14px;height:14px;display:inline-block;vertical-align:-2px;"></iconify-icon> Abordagem
+            </button>
+            <button class="tab-btn" onclick="switchTab(this, '{{ loop.index0 }}', 1)">
+              <iconify-icon icon="heroicons:target" style="width:14px;height:14px;display:inline-block;vertical-align:-2px;"></iconify-icon> Objecoes
+            </button>
+            <button class="tab-btn" onclick="switchTab(this, '{{ loop.index0 }}', 2)">
+              <iconify-icon icon="heroicons:handshake" style="width:14px;height:14px;display:inline-block;vertical-align:-2px;"></iconify-icon> Fechamento
+            </button>
+          </div>
+
+          <div id="tab-group-{{ loop.index0 }}">
+            <div class="tab-content active">
+              {% if lead.tem_site and lead.url_site %}
+              <div style="margin-bottom:6px;">
+                <a href="{{ lead.url_site }}" target="_blank" class="site-link">
+                  <iconify-icon icon="heroicons:globe-alt" style="width:14px;height:14px;display:inline-block;vertical-align:-2px;"></iconify-icon> Visualizar Site Atual
+                </a>
+              </div>
+              {% endif %}
+              <textarea class="msg-textarea" id="msg-{{ loop.index0 }}-0">{{ lead.msg1 }}</textarea>
+            </div>
+            <div class="tab-content">
+              <textarea class="msg-textarea" id="msg-{{ loop.index0 }}-1">{{ lead.msg2 }}</textarea>
+            </div>
+            <div class="tab-content">
+              <textarea class="msg-textarea" id="msg-{{ loop.index0 }}-2">{{ lead.msg3 }}</textarea>
+            </div>
+          </div>
+
+          <!-- Action buttons -->
+          <div style="display:flex; gap:8px; margin-top:10px; align-items:center;">
+            <button class="primary-btn" style="padding:8px 18px; font-size:0.8rem;" onclick="abrirWhatsApp({{ loop.index0 }}, '{{ lead.telefone_limpo }}')">
+              <iconify-icon icon="heroicons:rocket-launch" style="width:16px;height:16px;"></iconify-icon>
+              Abrir WhatsApp e Iniciar Funil
+            </button>
+
+            <div style="display:flex; align-items:center; gap:6px;">
+              <iconify-icon icon="heroicons:cpu-chip" style="width:16px;height:16px;color:#A0AEC0;"></iconify-icon>
+              <span style="font-size:0.75rem; font-weight:600; color:#4A5568;">Motor de Treplica</span>
+            </div>
+
+            <select id="etapa-{{ loop.index0 }}" style="font-size:0.75rem; border:1px solid #E2E8F0; border-radius:8px; padding:6px; background:white;">
+              <option value="abordagem">Abordagem</option>
+              <option value="objecao">Objecao</option>
+              <option value="fechamento">Fechamento</option>
+            </select>
+
+            <button class="secondary-btn" onclick="gerarReplica({{ loop.index0 }}, '{{ lead.segmento }}')">
+              <iconify-icon icon="heroicons:cpu-chip" style="width:14px;height:14px;display:inline-block;vertical-align:-2px;"></iconify-icon>
+              Gerar Replica
+            </button>
+
+            <button class="secondary-btn" onclick="copiarResposta({{ loop.index0 }})">
+              <iconify-icon icon="heroicons:clipboard-document-list" style="width:14px;height:14px;display:inline-block;vertical-align:-2px;"></iconify-icon>
+              <span id="copy-text-{{ loop.index0 }}">Copiar</span>
+            </button>
+          </div>
+
+          <div id="replica-{{ loop.index0 }}" style="margin-top:8px; display:none;">
+            <div style="background:#F7FAFC; border:1px solid #E2E8F0; border-radius:10px; padding:12px; font-size:0.85rem; color:#1A202C; position:relative;">
+              <p style="margin:0 0 4px; font-weight:600; font-size:0.75rem; color:#4A5568;">Resposta da IA:</p>
+              <p id="reply-content-{{ loop.index0 }}" style="margin:0; white-space:pre-wrap;"></p>
+            </div>
+          </div>
+          <div id="erro-replica-{{ loop.index0 }}" style="margin-top:8px;display:none;">
+            <div style="background:#FFF5F5; border-left:4px solid #FC8181; border-radius:8px; padding:10px 14px; font-size:0.82rem; color:#C53030;">
+              <iconify-icon icon="heroicons:x-circle" style="width:14px;height:14px;display:inline-block;vertical-align:-2px;"></iconify-icon>
+              Erro ao gerar replica. Tente novamente.
+            </div>
+          </div>
+
+          <!-- Contract section -->
+          <div style="margin-top:8px;">
+            <button class="secondary-btn" onclick="toggleContrato({{ loop.index0 }})" style="display:inline-flex; align-items:center; gap:6px;">
+              <iconify-icon icon="heroicons:document-text" style="width:14px;height:14px;"></iconify-icon>
+              <span>Gerar Contrato</span>
+              <iconify-icon id="contrato-chevron-{{ loop.index0 }}" icon="heroicons:chevron-down" style="width:14px;height:14px;transition:transform 0.2s;"></iconify-icon>
+            </button>
+
+            <div id="contrato-area-{{ loop.index0 }}" style="display:none; margin-top:8px;">
+              <div style="background:#F7FAFC; border:1.5px solid #E2E8F0; border-radius:10px; padding:12px;">
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+                  <label style="font-size:0.75rem; font-weight:600; color:#4A5568; white-space:nowrap;">CPF/CNPJ do Cliente:</label>
+                  <input type="text" id="contrato-doc-{{ loop.index0 }}" placeholder="000.000.000-00"
+                         style="flex:1; max-width:220px; border:1.5px solid #CBD5E0; border-radius:8px; padding:8px 10px; font-size:0.8rem; outline:none;"
+                         onfocus="this.style.borderColor='#4FD1C5'" onblur="this.style.borderColor='#CBD5E0'"/>
+                </div>
+                <div style="display:flex; gap:12px; flex-wrap:wrap;">
+                  <div style="flex:1; min-width:200px; background:white; border:1px solid #E2E8F0; border-radius:8px; padding:10px;">
+                    <div style="display:flex; align-items:center; gap:6px; margin-bottom:6px;">
+                      <iconify-icon icon="heroicons:globe-alt" style="width:16px;height:16px;color:#319795;"></iconify-icon>
+                      <input type="text" id="contrato-tipo-{{ loop.index0 }}-0" value="Site Institucional"
+                             style="flex:1; border:none; font-size:0.85rem; font-weight:700; color:#1A202C; outline:none; background:transparent;"/>
+                    </div>
+                    <div style="display:flex; gap:6px; align-items:center;">
+                      <span style="font-size:0.9rem; font-weight:700; color:#4A5568;">R$</span>
+                      <input type="number" id="contrato-valor-{{ loop.index0 }}-0" value="2970" step="0.01" min="0"
+                             style="flex:1; border:1px solid #E2E8F0; border-radius:6px; padding:6px 8px; font-size:0.85rem; font-weight:600; color:#1A202C; outline:none; background:#F7FAFC;"
+                             onfocus="this.style.borderColor='#4FD1C5'" onblur="this.style.borderColor='#E2E8F0'"/>
+                      <button class="secondary-btn" onclick="gerarContratoLead({{ loop.index0 }}, 0, '{{ lead.nome | e }}')" style="white-space:nowrap;">
+                        <iconify-icon icon="heroicons:document-arrow-down" style="width:14px;height:14px;"></iconify-icon>
+                        PDF
+                      </button>
+                    </div>
+                    <div style="font-size:0.65rem; color:#A0AEC0; margin-top:4px;">Sinal 50%: R$ <span id="contrato-sinal-{{ loop.index0 }}-0">1.485</span></div>
+                  </div>
+                  <div style="flex:1; min-width:200px; background:white; border:1px solid #E2E8F0; border-radius:8px; padding:10px;">
+                    <div style="display:flex; align-items:center; gap:6px; margin-bottom:6px;">
+                      <iconify-icon icon="heroicons:rocket-launch" style="width:16px;height:16px;color:#319795;"></iconify-icon>
+                      <input type="text" id="contrato-tipo-{{ loop.index0 }}-1" value="Site Premium"
+                             style="flex:1; border:none; font-size:0.85rem; font-weight:700; color:#1A202C; outline:none; background:transparent;"/>
+                    </div>
+                    <div style="display:flex; gap:6px; align-items:center;">
+                      <span style="font-size:0.9rem; font-weight:700; color:#4A5568;">R$</span>
+                      <input type="number" id="contrato-valor-{{ loop.index0 }}-1" value="5970" step="0.01" min="0"
+                             style="flex:1; border:1px solid #E2E8F0; border-radius:6px; padding:6px 8px; font-size:0.85rem; font-weight:600; color:#1A202C; outline:none; background:#F7FAFC;"
+                             onfocus="this.style.borderColor='#4FD1C5'" onblur="this.style.borderColor='#E2E8F0'"/>
+                      <button class="secondary-btn" onclick="gerarContratoLead({{ loop.index0 }}, 1, '{{ lead.nome | e }}')" style="white-space:nowrap;">
+                        <iconify-icon icon="heroicons:document-arrow-down" style="width:14px;height:14px;"></iconify-icon>
+                        PDF
+                      </button>
+                    </div>
+                    <div style="font-size:0.65rem; color:#A0AEC0; margin-top:4px;">Sinal 50%: R$ <span id="contrato-sinal-{{ loop.index0 }}-1">2.985</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+  </div>
+</main>
+</div>
+<script>
+var hdr = document.querySelector('header');
+window.addEventListener('scroll', function() { hdr.classList.toggle('scrolled', window.scrollY > 20); });
+
+function switchTab(btn, group, tab) {
+  var container = document.getElementById('tab-group-' + group);
+  var btns = container.parentElement.querySelectorAll('.tab-btn');
+  btns.forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  var tabs = container.querySelectorAll('.tab-content');
+  tabs.forEach(function(t, i) { t.classList.toggle('active', i === tab); });
+}
+
+function abrirWhatsApp(idx, telefone) {
+  var texto = '';
+  for (var i = 0; i < 3; i++) {
+    var el = document.getElementById('msg-' + idx + '-' + i);
+    if (el) texto += el.value + '\n\n';
+  }
+  var url = 'https://web.whatsapp.com/send?phone=' + encodeURIComponent(telefone) + '&text=' + encodeURIComponent(texto.trim());
+  window.open(url, '_blank');
+}
+
+function gerarReplica(idx, segmento) {
+  var etapa = document.getElementById('etapa-' + idx).value;
+  var resposta = prompt('Digite a resposta do cliente (ou deixe em branco para detectar objecao automaticamente):');
+  if (resposta === null) return;
+  document.getElementById('replica-' + idx).style.display = 'block';
+  document.getElementById('erro-replica-' + idx).style.display = 'none';
+  document.getElementById('reply-content-' + idx).textContent = 'Gerando resposta...';
+  fetch('/gerar_replica', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ nicho: segmento, etapa: etapa, resposta: resposta || '' })
+  }).then(function(r) { return r.json(); }).then(function(d) {
+    document.getElementById('reply-content-' + idx).textContent = d.reply;
+  }).catch(function() {
+    document.getElementById('replica-' + idx).style.display = 'none';
+    document.getElementById('erro-replica-' + idx).style.display = 'block';
+  });
+}
+
+function copiarResposta(idx) {
+  var txt = document.getElementById('reply-content-' + idx);
+  if (!txt || !txt.textContent) return;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(txt.textContent).then(function() {
+      var el = document.getElementById('copy-text-' + idx);
+      if (el) { el.textContent = 'Copiado!'; setTimeout(function() { el.textContent = 'Copiar'; }, 2000); }
+    });
+  }
+}
+
+function toggleContrato(idx) {
+  var area = document.getElementById('contrato-area-' + idx);
+  var chevron = document.getElementById('contrato-chevron-' + idx);
+  var isHidden = area.style.display === 'none';
+  area.style.display = isHidden ? 'block' : 'none';
+  if (chevron) chevron.style.transform = isHidden ? 'rotate(180deg)' : '';
+}
+
+function gerarContratoLead(idx, contratoIdx, nome) {
+  var doc = document.getElementById('contrato-doc-' + idx).value.trim();
+  if (!doc) { alert('Preencha o CPF ou CNPJ do cliente primeiro.'); return; }
+  var tipo = document.getElementById('contrato-tipo-' + idx + '-' + contratoIdx).value;
+  var raw = document.getElementById('contrato-valor-' + idx + '-' + contratoIdx).value;
+  var valor = parseFloat(raw.replace(/\./g, '').replace(',', '.'));
+  if (!valor || valor <= 0) { alert('Informe um valor válido para o contrato.'); return; }
+  var btn = event.target;
+  if (btn.tagName !== 'BUTTON') btn = btn.closest('button');
+  var original = btn.innerHTML;
+  btn.innerHTML = '<iconify-icon icon="heroicons:arrow-path" style="width:14px;height:14px;display:inline-block;animation:spin 1s linear infinite;"></iconify-icon> Gerando...';
+  btn.disabled = true;
+  fetch('/gerar_contrato_lead', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ cliente_nome: nome, cliente_doc: doc, valor_projeto: valor, tipo_contrato: tipo })
+  }).then(function(r) {
+    if (!r.ok) return r.json().then(function(e) { throw new Error(e.erro || 'Erro ao gerar contrato'); });
+    return r.blob();
+  }).then(function(blob) {
+    var url = window.URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'contrato_' + nome.replace(/\s+/g, '_').toLowerCase() + '_' + tipo.replace(/\s+/g, '_').toLowerCase() + '.pdf';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+    btn.disabled = false;
+    btn.innerHTML = original;
+  }).catch(function(err) {
+    alert(err.message || 'Erro ao gerar contrato. Tente novamente.');
+    btn.disabled = false;
+    btn.innerHTML = original;
+  });
+}
+
+document.querySelectorAll('[id^="contrato-valor-"]').forEach(function(input) {
+  input.addEventListener('input', function() {
+    var parts = this.id.split('-');
+    var idx = parts[2];
+    var cIdx = parts[3];
+    var sinal = document.getElementById('contrato-sinal-' + idx + '-' + cIdx);
+    if (sinal) {
+      var val = parseFloat(this.value.replace(/\./g, '').replace(',', '.')) || 0;
+      sinal.textContent = (val / 2).toFixed(2).replace('.', ',');
+    }
+  });
+});
+
+document.getElementById('search-input')?.addEventListener('input', function() {
+  var q = this.value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  document.querySelectorAll('.lead-card').forEach(function(card) {
+    var name = (card.querySelector('.lead-name')?.textContent || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    card.style.display = name.includes(q) ? '' : 'none';
+  });
+});
+</script>
+</body>
+</html>

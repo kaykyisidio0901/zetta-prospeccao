@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html class="light" lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ZETTA FUNNEL PRO - Configurações</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="https://cdn.jsdelivr.net/npm/iconify-icon@2.3.0/dist/iconify-icon.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+* { font-family: 'Inter', sans-serif; }
+body { background-color: #FFFFFF; color: #1A202C; margin: 0; }
+.sidebar {
+  position: fixed; left: 0; top: 0; height: 100%; width: 260px;
+  background: #F8F9FA; border-right: 1px solid #E2E8F0;
+  display: flex; flex-direction: column; z-index: 50;
+}
+.sidebar-brand {
+  display: flex; align-items: center; gap: 10px;
+  padding: 20px 20px 16px;
+}
+.sidebar-brand .logo-img {
+  width: 40px; height: 40px; object-fit: contain;
+  border-radius: 6px;
+}.sidebar-brand h1 { color: #006a63; font-size: 1.15rem; font-weight: 800; margin: 0; line-height: 1.2; }
+.sidebar-brand p { color: #6c7a77; font-size: 0.6rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; margin: 0; }
+.sidebar-nav { list-style: none; padding: 0 8px; margin: 0 0 16px; }
+.sidebar-nav li {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 16px; margin: 2px 0; border-radius: 10px;
+  font-size: 0.85rem; font-weight: 500; color: #4A5568;
+  cursor: default; transition: all 0.15s;
+}
+.sidebar-nav li:hover { background: #EDF2F7; }
+.sidebar-nav li.active {
+  background: #E6FFFA; color: #319795; font-weight: 700;
+  box-shadow: inset 3px 0 0 0 #319795;
+}
+.sidebar-nav li .nav-icon { width: 22px; height: 22px; flex-shrink: 0; }
+.sidebar-nav li.active .nav-icon { color: #319795; }
+.sidebar-nav li a { text-decoration: none; color: inherit; display: flex; align-items: center; gap: 12px; width: 100%; }
+.sidebar-section {
+  font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.08em; color: #A0AEC0; padding: 16px 20px 6px;
+}
+.form-card {
+  background: #FFFFFF; border: 1px solid #E2E8F0;
+  border-radius: 16px; overflow: hidden;
+  box-shadow: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -2px rgba(0,0,0,0.04);
+  max-width: 640px; margin: 0 auto;
+}
+.form-card h2 {
+  font-size: 1.1rem; font-weight: 700; margin: 0;
+  padding: 20px 24px 0; color: #1A202C;
+}
+.form-card .sub {
+  font-size: 0.8rem; color: #718096; margin: 4px 0 0;
+  padding: 0 24px;
+}
+.form-body { padding: 20px 24px; display: flex; flex-direction: column; gap: 16px; }
+.form-body label { font-size: 0.8rem; font-weight: 600; color: #4A5568; display: flex; flex-direction: column; gap: 4px; }
+.form-body input {
+  border: 1px solid #E2E8F0; border-radius: 10px; padding: 10px 14px;
+  font-size: 0.9rem; outline: none; transition: border 0.15s;
+  background: #F7FAFC;
+}
+.form-body input:focus { border-color: #4FD1C5; background: white; }
+.primary-btn {
+  background: #4FD1C5; color: #1A202C; border: none; border-radius: 12px;
+  padding: 12px 24px; font-weight: 700; font-size: 0.9rem;
+  box-shadow: 0 4px 14px 0 rgba(79, 209, 197, 0.4);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%;
+}
+.primary-btn:hover {
+  transform: translateY(-2px); background: #38B2AC;
+  box-shadow: 0 6px 20px 0 rgba(79, 209, 197, 0.6);
+}
+.sucesso-msg { background: #F0FFF4; border-left: 4px solid #38A169; border-radius: 8px; padding: 12px 16px; font-size: 0.85rem; color: #276749; }
+.photo-preview { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid #E2E8F0; }
+header.scrolled { box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+</style>
+</head>
+<body>
+<div class="flex" style="min-height: 100vh;">
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <img src="/uploads/logo.png" alt="ZETTA" class="logo-img">
+    <div>
+      <h1>ZETTA</h1>
+      <p>Funnel Pro</p>
+    </div>
+  </div>
+  <div class="sidebar-section">Menu</div>
+  <ul class="sidebar-nav">
+    <li><a href="/dashboard"><iconify-icon icon="heroicons:rectangle-group" class="nav-icon"></iconify-icon> Dashboard</a></li>
+    <li><a href="/funnels"><iconify-icon icon="heroicons:funnel" class="nav-icon"></iconify-icon> Funnels</a></li>
+    <li><a href="/leads"><iconify-icon icon="heroicons:users" class="nav-icon"></iconify-icon> Leads</a></li>
+    <li><a href="/automations"><iconify-icon icon="heroicons:bolt" class="nav-icon"></iconify-icon> Automations</a></li>
+    <li><a href="/scraper"><iconify-icon icon="heroicons:magnifying-glass" class="nav-icon"></iconify-icon> Capturar Leads</a></li>
+    <li><a href="/analytics"><iconify-icon icon="heroicons:chart-bar" class="nav-icon"></iconify-icon> Analytics</a></li>
+    <li><a href="/strategy"><iconify-icon icon="heroicons:light-bulb" class="nav-icon"></iconify-icon> Estratégia</a></li>
+    <li><a href="/contratos"><iconify-icon icon="heroicons:document-text" class="nav-icon"></iconify-icon> Gerador de Contratos</a></li>
+    <li class="active"><iconify-icon icon="heroicons:cog-6-tooth" class="nav-icon"></iconify-icon> Configurações</li>
+  </ul>
+  <div class="sidebar-section">Conta</div>
+  <div style="padding: 0 16px;">
+    <a href="/logout" style="width:100%; font-size:0.8rem; padding:10px; background:#EDF2F7; color:#4A5568; border:none; border-radius:12px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:8px; text-decoration:none;">
+      <iconify-icon icon="heroicons:arrow-right-on-rectangle" style="width:16px;height:16px;"></iconify-icon> Sair
+    </a>
+  </div>
+</aside>
+
+<!-- Main -->
+<main style="margin-left:260px; flex:1; background:#FFFFFF; min-height:100vh;">
+
+  <header style="height:64px; border-bottom:1px solid #E2E8F0; padding:0 32px; display:flex; align-items:center; justify-content:space-between; background:rgba(255,255,255,0.9); position:sticky; top:0; z-index:40;">
+    <div style="display:flex; align-items:center; gap:16px;">
+      <iconify-icon icon="heroicons:cog-6-tooth" style="width:22px;height:22px;color:#319795;"></iconify-icon>
+      <h2 style="font-size:1.2rem; font-weight:700; color:#1A202C; margin:0;">Configurações</h2>
+    </div>
+  </header>
+
+  <div style="padding:32px; max-width:1280px; margin:0 auto;">
+
+    <div class="form-card">
+      <h2>Perfil da Empresa</h2>
+      <p class="sub">Configure os dados da sua empresa e o WhatsApp usado para disparo.</p>
+
+      <form method="POST" action="/settings" enctype="multipart/form-data">
+        <div class="form-body">
+          {% if sucesso %}<div class="sucesso-msg">{{ sucesso }}</div>{% endif %}
+
+          <div style="display:flex; align-items:center; gap:20px;">
+            {% if settings.photo_path %}
+            <img src="{{ settings.photo_path }}" alt="Foto" class="photo-preview"/>
+            {% else %}
+            <div style="width:80px;height:80px;border-radius:50%;background:#E2E8F0;display:flex;align-items:center;justify-content:center;">
+              <iconify-icon icon="heroicons:user" style="width:32px;height:32px;color:#A0AEC0;"></iconify-icon>
+            </div>
+            {% endif %}
+            <label style="flex:1;">
+              Foto do Perfil
+              <input type="file" name="photo" accept="image/*"/>
+            </label>
+          </div>
+
+          <label>
+            Nome da Empresa
+            <input type="text" name="company_name" value="{{ settings.company_name }}"
+                   placeholder="Ex: ZETTA Agência Digital"/>
+          </label>
+
+          <label>
+            WhatsApp para Disparo
+            <input type="text" name="whatsapp_number" value="{{ settings.whatsapp_number }}"
+                   placeholder="Ex: 5511999999999 (código do país + DDD + número)"/>
+          </label>
+
+          <button type="submit" class="primary-btn">
+            <iconify-icon icon="heroicons:check" style="width:18px;height:18px;"></iconify-icon>
+            Salvar Configurações
+          </button>
+        </div>
+      </form>
+    </div>
+
+  </div>
+</main>
+</div>
+<script>
+var hdr = document.querySelector('header');
+window.addEventListener('scroll', function() { hdr.classList.toggle('scrolled', window.scrollY > 20); });
+</script>
+</body>
+</html>

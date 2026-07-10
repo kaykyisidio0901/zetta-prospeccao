@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html class="light" lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ZETTA FUNNEL PRO - Funis</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="https://cdn.jsdelivr.net/npm/iconify-icon@2.3.0/dist/iconify-icon.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+* { font-family: 'Inter', sans-serif; }
+body { background-color: #FFFFFF; color: #1A202C; margin: 0; }
+.sidebar {
+  position: fixed; left: 0; top: 0; height: 100%; width: 260px;
+  background: #F8F9FA; border-right: 1px solid #E2E8F0;
+  display: flex; flex-direction: column; z-index: 50;
+}
+.sidebar-brand {
+  display: flex; align-items: center; gap: 10px;
+  padding: 20px 20px 16px;
+}
+.sidebar-brand .logo-img {
+  width: 40px; height: 40px; object-fit: contain;
+  border-radius: 6px;
+}.sidebar-brand h1 { color: #006a63; font-size: 1.15rem; font-weight: 800; margin: 0; line-height: 1.2; }
+.sidebar-brand p { color: #6c7a77; font-size: 0.6rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; margin: 0; }
+.sidebar-nav { list-style: none; padding: 0 8px; margin: 0 0 16px; }
+.sidebar-nav li {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 16px; margin: 2px 0; border-radius: 10px;
+  font-size: 0.85rem; font-weight: 500; color: #4A5568;
+  cursor: default; transition: all 0.15s;
+}
+.sidebar-nav li:hover { background: #EDF2F7; }
+.sidebar-nav li.active {
+  background: #E6FFFA; color: #319795; font-weight: 700;
+  box-shadow: inset 3px 0 0 0 #319795;
+}
+.sidebar-nav li .nav-icon { width: 22px; height: 22px; flex-shrink: 0; }
+.sidebar-nav li.active .nav-icon { color: #319795; }
+.sidebar-nav li a { text-decoration: none; color: inherit; display: flex; align-items: center; gap: 12px; width: 100%; }
+.sidebar-section {
+  font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.08em; color: #A0AEC0; padding: 16px 20px 6px;
+}
+.kanban { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; min-height: 400px; }
+.kanban-col {
+  background: #F7FAFC; border: 1px solid #E2E8F0; border-radius: 12px;
+  padding: 12px; display: flex; flex-direction: column; gap: 8px;
+}
+.kanban-col h3 { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #4A5568; margin: 0 0 8px; padding: 4px 8px; background: #EDF2F7; border-radius: 6px; display: flex; justify-content: space-between; }
+.kanban-card {
+  background: white; border: 1px solid #E2E8F0; border-radius: 10px;
+  padding: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+  transition: all 0.15s;
+}
+.kanban-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+.primary-btn {
+  background: #4FD1C5; color: #1A202C; border: none; border-radius: 12px;
+  padding: 12px 24px; font-weight: 700; font-size: 0.9rem;
+  box-shadow: 0 4px 14px 0 rgba(79, 209, 197, 0.4);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+}
+.primary-btn:hover {
+  transform: translateY(-2px); background: #38B2AC;
+  box-shadow: 0 6px 20px 0 rgba(79, 209, 197, 0.6);
+}
+.secondary-btn {
+  background: #EDF2F7; color: #4A5568; border: none; border-radius: 10px;
+  padding: 8px 14px; font-weight: 600; font-size: 0.8rem;
+  cursor: pointer; transition: all 0.15s;
+}
+.secondary-btn:hover { background: #E2E8F0; }
+header.scrolled { box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+.accordion { border: 1px solid #E2E8F0; border-radius: 12px; overflow: hidden; }
+.accordion-header {
+  background: #F7FAFC; padding: 16px 20px; font-weight: 700; font-size: 0.9rem;
+  color: #1A202C; cursor: pointer; display: flex; align-items: center; gap: 10px;
+  border-bottom: 1px solid #E2E8F0; transition: background 0.15s;
+}
+.accordion-header:hover { background: #EDF2F7; }
+.accordion-body { padding: 20px; display: none; }
+.accordion-body.open { display: block; }
+</style>
+</head>
+<body>
+<div class="flex" style="min-height: 100vh;">
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <img src="/uploads/logo.png" alt="ZETTA" class="logo-img">
+    <div>
+      <h1>ZETTA</h1>
+      <p>Funnel Pro</p>
+    </div>
+  </div>
+  <div class="sidebar-section">Menu</div>
+  <ul class="sidebar-nav">
+    <li><a href="/dashboard"><iconify-icon icon="heroicons:rectangle-group" class="nav-icon"></iconify-icon> Dashboard</a></li>
+    <li class="active"><iconify-icon icon="heroicons:funnel" class="nav-icon"></iconify-icon> Funnels</li>
+    <li><a href="/leads"><iconify-icon icon="heroicons:users" class="nav-icon"></iconify-icon> Leads</a></li>
+    <li><a href="/automations"><iconify-icon icon="heroicons:bolt" class="nav-icon"></iconify-icon> Automations</a></li>
+    <li><a href="/scraper"><iconify-icon icon="heroicons:magnifying-glass" class="nav-icon"></iconify-icon> Capturar Leads</a></li>
+    <li><a href="/analytics"><iconify-icon icon="heroicons:chart-bar" class="nav-icon"></iconify-icon> Analytics</a></li>
+    <li><a href="/strategy"><iconify-icon icon="heroicons:light-bulb" class="nav-icon"></iconify-icon> Estratégia</a></li>
+    <li><a href="/contratos"><iconify-icon icon="heroicons:document-text" class="nav-icon"></iconify-icon> Gerador de Contratos</a></li>
+    <li><a href="/settings"><iconify-icon icon="heroicons:cog-6-tooth" class="nav-icon"></iconify-icon> Configurações</a></li>
+  </ul>
+  <div class="sidebar-section">Conta</div>
+  <div style="padding: 0 16px;">
+    <a href="/logout" style="width:100%; font-size:0.8rem; padding:10px; background:#EDF2F7; color:#4A5568; border:none; border-radius:12px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:8px; text-decoration:none;">
+      <iconify-icon icon="heroicons:arrow-right-on-rectangle" style="width:16px;height:16px;"></iconify-icon> Sair
+    </a>
+  </div>
+</aside>
+
+<!-- Main -->
+<main style="margin-left:260px; flex:1; background:#FFFFFF; min-height:100vh;">
+
+  <header style="height:64px; border-bottom:1px solid #E2E8F0; padding:0 32px; display:flex; align-items:center; justify-content:space-between; background:rgba(255,255,255,0.9); position:sticky; top:0; z-index:40;">
+    <div style="display:flex; align-items:center; gap:16px;">
+      <iconify-icon icon="heroicons:funnel" style="width:22px;height:22px;color:#319795;"></iconify-icon>
+      <h2 style="font-size:1.2rem; font-weight:700; color:#1A202C; margin:0;">Gerenciador de Funis de Vendas</h2>
+    </div>
+    <div style="display:flex;align-items:center;gap:16px;">
+      <iconify-icon icon="heroicons:bell" style="width:20px;height:20px;color:#A0AEC0;"></iconify-icon>
+    </div>
+  </header>
+
+  <div style="padding:32px; max-width:1280px; margin:0 auto;">
+
+    <!-- Accordion: Scripts IA -->
+    <div class="accordion" style="margin-bottom:24px;">
+      <div class="accordion-header" onclick="toggleAccordion(event)">
+        <iconify-icon icon="heroicons:cog-6-tooth" style="width:20px;height:20px;color:#319795;"></iconify-icon>
+        Configuracao de Scripts da IA
+      </div>
+      <div class="accordion-body">
+        <form id="form-base-msg">
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <label style="font-size:0.8rem; font-weight:600; color:#4A5568; display:flex; flex-direction:column; gap:4px;">
+              <span style="display:flex;align-items:center;gap:6px;"><iconify-icon icon="heroicons:envelope" style="width:16px;height:16px;color:#319795;"></iconify-icon> Mensagem 1 — Abordagem Inicial</span>
+              <textarea style="border:1px solid #E2E8F0; border-radius:10px; padding:10px 14px; font-size:0.9rem; outline:none; background:#F7FAFC; min-height:60px; resize:vertical;">{{ base_msg.msg1 }}</textarea>
+            </label>
+            <label style="font-size:0.8rem; font-weight:600; color:#4A5568; display:flex; flex-direction:column; gap:4px;">
+              <span style="display:flex;align-items:center;gap:6px;"><iconify-icon icon="heroicons:target" style="width:16px;height:16px;color:#319795;"></iconify-icon> Mensagem 2 — Gancho de Valor</span>
+              <textarea style="border:1px solid #E2E8F0; border-radius:10px; padding:10px 14px; font-size:0.9rem; outline:none; background:#F7FAFC; min-height:60px; resize:vertical;">{{ base_msg.msg2 }}</textarea>
+            </label>
+            <label style="font-size:0.8rem; font-weight:600; color:#4A5568; display:flex; flex-direction:column; gap:4px;">
+              <span style="display:flex;align-items:center;gap:6px;"><iconify-icon icon="heroicons:handshake" style="width:16px;height:16px;color:#319795;"></iconify-icon> Mensagem 3 — Proposta / Fechamento</span>
+              <textarea style="border:1px solid #E2E8F0; border-radius:10px; padding:10px 14px; font-size:0.9rem; outline:none; background:#F7FAFC; min-height:60px; resize:vertical;">{{ base_msg.msg3 }}</textarea>
+            </label>
+            <button type="submit" class="primary-btn" style="width:auto;align-self:flex-start;" id="btn-salvar-base">
+              <iconify-icon icon="heroicons:computer-desktop" style="width:18px;height:18px;"></iconify-icon>
+              <span id="btn-base-text">Salvar Base</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Kanban -->
+    {% set total_global = pipeline.values() | map('length') | sum %}
+    {% if total_global == 0 %}
+    <div style="text-align:center; padding:64px 24px; border:2px dashed #E2E8F0; border-radius:16px; background:#F7FAFC;">
+      <iconify-icon icon="heroicons:funnel" style="width:48px;height:48px;color:#A0AEC0;margin-bottom:16px;"></iconify-icon>
+      <h3 style="font-size:1.1rem; font-weight:700; color:#1A202C; margin:0 0 8px;">Nenhum lead no funil</h3>
+      <p style="font-size:0.85rem; color:#718096; margin:0;">Importe leads pelo CSV ou use o Scraper para comecar.</p>
+    </div>
+    {% else %}
+    <div class="kanban">
+      {% for col in colunas %}
+      <div class="kanban-col" data-col="{{ col }}">
+        <h3>{{ rotulos[col] }} <span style="background:#319795;color:white;border-radius:20px;padding:0 8px;font-size:0.7rem;">{{ pipeline[col]|length }}</span></h3>
+        {% for lead in pipeline[col] %}
+        <div class="kanban-card">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+            <div style="width:32px;height:32px;border-radius:50%;background:#4FD1C5;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;color:white;flex-shrink:0;">{{ lead.iniciais }}</div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-weight:600;font-size:0.8rem;color:#1A202C;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ lead.nome }}</div>
+              <div style="font-size:0.65rem;color:#A0AEC0;">{{ lead.segmento }}</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:4px;">
+            {% if col != "abordar" %}
+            <button class="secondary-btn mover-btn" data-indice="{{ loop.index0 }}" data-dir="-1" style="font-size:0.7rem;padding:4px 10px;"><iconify-icon icon="heroicons:chevron-left" style="width:14px;height:14px;"></iconify-icon></button>
+            {% endif %}
+            {% if col != "fechado" %}
+            <button class="secondary-btn mover-btn" data-indice="{{ loop.index0 }}" data-dir="1" style="font-size:0.7rem;padding:4px 10px;"><iconify-icon icon="heroicons:chevron-right" style="width:14px;height:14px;"></iconify-icon></button>
+            {% endif %}
+            {% if lead.telefone %}
+            <a href="https://web.whatsapp.com/send?phone={{ lead.telefone_limpo }}" target="_blank" class="secondary-btn" style="font-size:0.7rem;padding:4px 10px;text-decoration:none;margin-left:auto;">
+              <iconify-icon icon="heroicons:chat-bubble-left-ellipsis" style="width:14px;height:14px;"></iconify-icon>
+            </a>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+        {% if col == "fechado" and pipeline[col] %}
+        <div style="padding:8px; border-top:1px solid #E2E8F0; margin-top:auto;">
+          <button onclick="document.getElementById('modal-massa').style.display='flex'" class="primary-btn" style="width:100%; font-size:0.75rem; padding:8px 12px;">
+            <iconify-icon icon="heroicons:document-text" style="width:14px;height:14px;"></iconify-icon>
+            Gerar Contratos em Massa ({{ pipeline[col]|length }})
+          </button>
+        </div>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+  </div>
+</main>
+
+<!-- Modal Bulk Contracts -->
+<div id="modal-massa" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:100; align-items:center; justify-content:center;">
+  <div style="background:white; border-radius:16px; padding:24px; max-width:420px; width:90%; box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:16px;">
+      <iconify-icon icon="heroicons:document-text" style="width:24px;height:24px;color:#319795;"></iconify-icon>
+      <h3 style="font-size:1rem; font-weight:700; margin:0; color:#1A202C;">Gerar Contratos em Massa</h3>
+    </div>
+    <p style="font-size:0.8rem; color:#718096; margin:0 0 16px;">
+      Defina os valores padrão para todos os leads da coluna <strong>Contrato Fechado</strong>.
+      Será gerado um arquivo ZIP com um PDF para cada lead.
+    </p>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <label style="font-size:0.8rem; font-weight:600; color:#4A5568; display:flex; flex-direction:column; gap:4px;">
+        Valor do Projeto (R$)
+        <input type="number" id="modal-valor-projeto" step="0.01" min="0" value="3000"
+               style="border:1px solid #E2E8F0; border-radius:10px; padding:10px 14px; font-size:0.9rem; outline:none; background:#F7FAFC;"/>
+      </label>
+      <label style="font-size:0.8rem; font-weight:600; color:#4A5568; display:flex; flex-direction:column; gap:4px;">
+        Sinal / Entrada (R$)
+        <input type="number" id="modal-valor-entrada" step="0.01" min="0" value="1500"
+               style="border:1px solid #E2E8F0; border-radius:10px; padding:10px 14px; font-size:0.9rem; outline:none; background:#F7FAFC;"/>
+      </label>
+      <label style="font-size:0.8rem; font-weight:600; color:#4A5568; display:flex; flex-direction:column; gap:4px;">
+        Prazo (dias)
+        <input type="number" id="modal-prazo-dias" min="1" max="180" value="30"
+               style="border:1px solid #E2E8F0; border-radius:10px; padding:10px 14px; font-size:0.9rem; outline:none; background:#F7FAFC;"/>
+      </label>
+    </div>
+    <div style="display:flex; gap:8px; margin-top:20px;">
+      <button onclick="document.getElementById('modal-massa').style.display='none'"
+              style="flex:1; background:#EDF2F7; color:#4A5568; border:none; border-radius:12px; padding:10px; font-weight:600; font-size:0.85rem; cursor:pointer;">
+        Cancelar
+      </button>
+      <button onclick="gerarContratosMassa()" class="primary-btn" style="flex:1; padding:10px; font-size:0.85rem;">
+        <iconify-icon icon="heroicons:document-text" style="width:16px;height:16px;"></iconify-icon>
+        Gerar ZIP
+      </button>
+    </div>
+    <div id="massa-status" style="margin-top:12px; font-size:0.8rem; color:#319795; text-align:center; display:none;"></div>
+  </div>
+</div>
+
+</div>
+<script>
+var hdr = document.querySelector('header');
+window.addEventListener('scroll', function() { hdr.classList.toggle('scrolled', window.scrollY > 20); });
+
+function toggleAccordion(e) {
+  var body = e.currentTarget.nextElementSibling;
+  body.classList.toggle('open');
+}
+
+document.querySelectorAll('.mover-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    var idx = this.dataset.indice;
+    var dir = parseInt(this.dataset.dir);
+    fetch('/funnels/mover', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({indice: parseInt(idx), direcao: dir})
+    }).then(function(r) { if (r.ok) location.reload(); });
+  });
+});
+
+document.getElementById('form-base-msg')?.addEventListener('submit', function(e) {
+  e.preventDefault();
+  var ta = this.querySelectorAll('textarea');
+  var btn = document.getElementById('btn-salvar-base');
+  var txt = document.getElementById('btn-base-text');
+  if (txt) txt.textContent = 'Salvando...';
+  fetch('/funnels/salvar_base', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({msg1: ta[0].value, msg2: ta[1].value, msg3: ta[2].value})
+  }).then(function(r) {
+    if (txt) txt.textContent = 'Salvar Base';
+  });
+});
+
+function gerarContratosMassa() {
+  var valorProjeto = parseFloat(document.getElementById('modal-valor-projeto').value) || 0;
+  var valorEntrada = parseFloat(document.getElementById('modal-valor-entrada').value) || 0;
+  var prazoDias = parseInt(document.getElementById('modal-prazo-dias').value) || 30;
+  if (valorProjeto <= 0) { alert('Valor do projeto deve ser maior que zero.'); return; }
+  var statusEl = document.getElementById('massa-status');
+  statusEl.style.display = 'block';
+  statusEl.innerHTML = 'Gerando contratos...';
+  fetch('/contratos/massa', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({valor_projeto: valorProjeto, valor_entrada: valorEntrada, prazo_dias: prazoDias})
+  }).then(function(r) {
+    if (!r.ok) { return r.json().then(function(d) { throw new Error(d.erro || 'Erro ao gerar'); }); }
+    return r.blob();
+  }).then(function(blob) {
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = 'contratos_massa.zip'; a.click();
+    URL.revokeObjectURL(url);
+    statusEl.textContent = 'Contratos gerados com sucesso!';
+    setTimeout(function() { document.getElementById('modal-massa').style.display = 'none'; }, 1500);
+  }).catch(function(err) {
+    statusEl.style.color = '#E53E3E';
+    statusEl.textContent = err.message;
+  });
+}
+</script>
+</body>
+</html>

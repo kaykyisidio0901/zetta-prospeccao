@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Placa de Conquista — ZETTA</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  min-height: 100vh;
+  background: #F2F5F9;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Inter', sans-serif;
+  padding: 40px 20px;
+}
+
+h1 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #718096;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-bottom: 48px;
+}
+
+.gallery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px;
+  justify-content: center;
+  align-items: center;
+}
+
+/* ═══════════════════════════════════════
+   PLACA PRINCIPAL
+   ═══════════════════════════════════════ */
+
+.plaque {
+  width: 220px;
+  height: 310px;
+  border-radius: 18px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 28px 18px 22px;
+
+  /* ── Brushed metal base ── */
+  background:
+    linear-gradient(145deg, #e8ecf1 0%, #d5dbe3 35%, #c8cfd9 50%, #dce1e8 75%, #eef1f5 100%);
+
+  /* ── Glass frame via box-shadow dupla ── */
+  box-shadow:
+    /* White glass highlight (top-left) */
+    inset 0 1px 0 rgba(255,255,255,0.85),
+    inset 0 -1px 0 rgba(0,0,0,0.04),
+    /* Turquoise/teal neon glow on edges */
+    0 0 0 1.5px rgba(79, 209, 197, 0.25),
+    0 0 0 4px rgba(255,255,255,0.35),
+    0 0 20px rgba(79, 209, 197, 0.08),
+    /* Deep shadow for depth */
+    0 12px 40px rgba(0,0,0,0.12),
+    0 4px 12px rgba(0,0,0,0.06);
+
+  /* ── Glassmorphism top highlight ── */
+  overflow: hidden;
+
+  /* ── Floating animation ── */
+  animation: floatY 3.8s ease-in-out infinite;
+}
+
+/* Different animation delay per sibling for wave effect */
+.gallery .plaque:nth-child(2) { animation-delay: -0.6s; }
+.gallery .plaque:nth-child(3) { animation-delay: -1.2s; }
+.gallery .plaque:nth-child(4) { animation-delay: -1.8s; }
+.gallery .plaque:nth-child(5) { animation-delay: -0.3s; }
+.gallery .plaque:nth-child(6) { animation-delay: -0.9s; }
+.gallery .plaque:nth-child(7) { animation-delay: -1.5s; }
+
+@keyframes floatY {
+  0%, 100% { transform: translateY(0px); }
+  50%      { transform: translateY(-10px); }
+}
+
+/* ── Shine overlay (glass reflection) ── */
+.plaque::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 18px;
+  background: linear-gradient(
+    135deg,
+    rgba(255,255,255,0.5) 0%,
+    rgba(255,255,255,0.15) 30%,
+    transparent 50%,
+    rgba(255,255,255,0.05) 70%,
+    rgba(255,255,255,0.2) 100%
+  );
+  pointer-events: none;
+}
+
+/* ── Brushed metal texture (micro lines) ── */
+.plaque::after {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border-radius: 14px;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.015) 2px,
+    rgba(0,0,0,0.015) 3px
+  );
+  pointer-events: none;
+}
+
+/* ── Inner glass border ── */
+.plaque-inner-border {
+  position: absolute;
+  inset: 5px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.35);
+  pointer-events: none;
+}
+
+/* ── Teal inner glow ring ── */
+.plaque-glow {
+  position: absolute;
+  inset: 3px;
+  border-radius: 16px;
+  border: 1.5px solid rgba(79, 209, 197, 0.15);
+  box-shadow: inset 0 0 18px rgba(79, 209, 197, 0.04);
+  pointer-events: none;
+}
+
+/* ═══════════════════════════════════════
+   CONTEÚDO
+   ═══════════════════════════════════════ */
+
+.plaque-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  width: 100%;
+  height: 100%;
+}
+
+/* ── Logo ── */
+.plaque-logo-img {
+  width: 100px;
+  height: auto;
+  margin-bottom: 14px;
+  display: block;
+}
+
+/* ── Decorative line ── */
+.plaque-divider {
+  width: 90px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(79, 209, 197, 0.4), transparent);
+  margin-bottom: 12px;
+}
+.plaque-divider-2 {
+  width: 60px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(44, 82, 130, 0.15), transparent);
+  margin-bottom: 10px;
+}
+
+/* ── Value ── */
+.plaque-value {
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: #1E3A5F;
+  line-height: 1.1;
+  margin-bottom: 4px;
+  letter-spacing: 1px;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.3);
+}
+.plaque-value.small {
+  font-size: 1.8rem;
+}
+
+/* ── Subtitle ── */
+.plaque-sub {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #2C5282;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+/* ── Thin divider ── */
+.plaque-line {
+  width: 80px;
+  height: 1px;
+  background: rgba(44, 82, 130, 0.1);
+  margin: 8px 0;
+}
+
+/* ── Status text ── */
+.plaque-status {
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: #4FD1C5;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  margin-top: 4px;
+  text-shadow: 0 0 12px rgba(79, 209, 197, 0.15);
+}
+
+/* ── Hidden screen-reader variant selector ── */
+.variant-selector {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 40px;
+}
+.variant-selector button {
+  padding: 8px 18px;
+  border-radius: 10px;
+  border: 1.5px solid #E2E8F0;
+  background: white;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #4A5568;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.variant-selector button:hover {
+  border-color: #4FD1C5;
+  color: #319795;
+  background: #E6FFFA;
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .plaque { width: 180px; height: 260px; padding: 20px 14px 16px; }
+  .plaque-z { font-size: 32px; }
+  .plaque-value { font-size: 1.6rem; }
+  .plaque-value.small { font-size: 1.3rem; }
+  .plaque-sub { font-size: 0.65rem; letter-spacing: 2px; }
+}
+</style>
+</head>
+<body>
+
+<h1>Placas de Conquista — ZETTA Funnel Pro</h1>
+
+<div class="gallery">
+
+  <!-- ─── 5K ─── -->
+  <div class="plaque">
+    <div class="plaque-inner-border"></div>
+    <div class="plaque-glow"></div>
+    <div class="plaque-content">
+      <img class="plaque-logo-img" src="/uploads/logo.png" alt="ZETTA">
+      <div class="plaque-divider"></div>
+      <div class="plaque-value">5K</div>
+      <div class="plaque-sub">DE VENDAS</div>
+      <div class="plaque-line"></div>
+      <div class="plaque-status">CONQUISTA DESBLOQUEADA</div>
+    </div>
+  </div>
+
+  <!-- ─── 10K ─── -->
+  <div class="plaque">
+    <div class="plaque-inner-border"></div>
+    <div class="plaque-glow"></div>
+    <div class="plaque-content">
+      <img class="plaque-logo-img" src="/uploads/logo.png" alt="ZETTA">
+      <div class="plaque-divider"></div>
+      <div class="plaque-value">10K</div>
+      <div class="plaque-sub">DE VENDAS</div>
+      <div class="plaque-line"></div>
+      <div class="plaque-status">CONQUISTA DESBLOQUEADA</div>
+    </div>
+  </div>
+
+  <!-- ─── 20K ─── -->
+  <div class="plaque">
+    <div class="plaque-inner-border"></div>
+    <div class="plaque-glow"></div>
+    <div class="plaque-content">
+      <img class="plaque-logo-img" src="/uploads/logo.png" alt="ZETTA">
+      <div class="plaque-divider"></div>
+      <div class="plaque-value">20K</div>
+      <div class="plaque-sub">DE VENDAS</div>
+      <div class="plaque-line"></div>
+      <div class="plaque-status">CONQUISTA DESBLOQUEADA</div>
+    </div>
+  </div>
+
+  <!-- ─── 30K ─── -->
+  <div class="plaque">
+    <div class="plaque-inner-border"></div>
+    <div class="plaque-glow"></div>
+    <div class="plaque-content">
+      <img class="plaque-logo-img" src="/uploads/logo.png" alt="ZETTA">
+      <div class="plaque-divider"></div>
+      <div class="plaque-value">30K</div>
+      <div class="plaque-sub">DE VENDAS</div>
+      <div class="plaque-line"></div>
+      <div class="plaque-status">CONQUISTA DESBLOQUEADA</div>
+    </div>
+  </div>
+
+  <!-- ─── 50K ─── -->
+  <div class="plaque">
+    <div class="plaque-inner-border"></div>
+    <div class="plaque-glow"></div>
+    <div class="plaque-content">
+      <img class="plaque-logo-img" src="/uploads/logo.png" alt="ZETTA">
+      <div class="plaque-divider"></div>
+      <div class="plaque-value">50K</div>
+      <div class="plaque-sub">DE VENDAS</div>
+      <div class="plaque-line"></div>
+      <div class="plaque-status">CONQUISTA DESBLOQUEADA</div>
+    </div>
+  </div>
+
+  <!-- ─── 100K ─── -->
+  <div class="plaque">
+    <div class="plaque-inner-border"></div>
+    <div class="plaque-glow"></div>
+    <div class="plaque-content">
+      <img class="plaque-logo-img" src="/uploads/logo.png" alt="ZETTA">
+      <div class="plaque-divider"></div>
+      <div class="plaque-value">100K</div>
+      <div class="plaque-sub">DE VENDAS</div>
+      <div class="plaque-line"></div>
+      <div class="plaque-status">CONQUISTA DESBLOQUEADA</div>
+    </div>
+  </div>
+
+  <!-- ─── 1 MILHÃO ─── -->
+  <div class="plaque">
+    <div class="plaque-inner-border"></div>
+    <div class="plaque-glow"></div>
+    <div class="plaque-content">
+      <img class="plaque-logo-img" src="/uploads/logo.png" alt="ZETTA">
+      <div class="plaque-divider"></div>
+      <div class="plaque-value small">1 MILHÃO</div>
+      <div class="plaque-sub">DE VENDAS</div>
+      <div class="plaque-line"></div>
+      <div class="plaque-status">CONQUISTA DESBLOQUEADA</div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html class="light" lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ZETTA FUNNEL PRO - Estratégia</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="https://cdn.jsdelivr.net/npm/iconify-icon@2.3.0/dist/iconify-icon.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+* { font-family: 'Inter', sans-serif; }
+body { background-color: #FFFFFF; color: #1A202C; margin: 0; }
+.sidebar {
+  position: fixed; left: 0; top: 0; height: 100%; width: 260px;
+  background: #F8F9FA; border-right: 1px solid #E2E8F0;
+  display: flex; flex-direction: column; z-index: 50;
+}
+.sidebar-brand {
+  display: flex; align-items: center; gap: 10px;
+  padding: 20px 20px 16px;
+}
+.sidebar-brand .logo-img {
+  width: 40px; height: 40px; object-fit: contain;
+  border-radius: 6px;
+}.sidebar-brand h1 { color: #006a63; font-size: 1.15rem; font-weight: 800; margin: 0; line-height: 1.2; }
+.sidebar-brand p { color: #6c7a77; font-size: 0.6rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; margin: 0; }
+.sidebar-nav { list-style: none; padding: 0 8px; margin: 0 0 16px; }
+.sidebar-nav li {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 16px; margin: 2px 0; border-radius: 10px;
+  font-size: 0.85rem; font-weight: 500; color: #4A5568;
+  cursor: default; transition: all 0.15s;
+}
+.sidebar-nav li:hover { background: #EDF2F7; }
+.sidebar-nav li.active {
+  background: #E6FFFA; color: #319795; font-weight: 700;
+  box-shadow: inset 3px 0 0 0 #319795;
+}
+.sidebar-nav li .nav-icon { width: 22px; height: 22px; flex-shrink: 0; }
+.sidebar-nav li.active .nav-icon { color: #319795; }
+.sidebar-nav li a { text-decoration: none; color: inherit; display: flex; align-items: center; gap: 12px; width: 100%; }
+.sidebar-section {
+  font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.08em; color: #A0AEC0; padding: 16px 20px 6px;
+}
+.primary-btn {
+  background: #4FD1C5; color: #1A202C; border: none; border-radius: 12px;
+  padding: 12px 24px; font-weight: 700; font-size: 0.9rem;
+  box-shadow: 0 4px 14px 0 rgba(79, 209, 197, 0.4);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+}
+.primary-btn:hover {
+  transform: translateY(-2px); background: #38B2AC;
+  box-shadow: 0 6px 20px 0 rgba(79, 209, 197, 0.6);
+}
+.small-btn {
+  background: #EDF2F7; color: #4A5568; border: none; border-radius: 8px;
+  padding: 6px 12px; font-size: 0.72rem; font-weight: 600; cursor: pointer; transition: all 0.15s;
+}
+.small-btn:hover { background: #E2E8F0; }
+.small-btn.danger { color: #E53E3E; }
+.small-btn.danger:hover { background: #FFF5F5; }
+header.scrolled { box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+
+/* Mind Map */
+.mindmap-wrapper {
+  position: relative;
+  overflow: visible;
+  padding: 10px 0 40px;
+}
+.mindmap-svg {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+.mindmap-root {
+  text-align: center;
+  margin-bottom: 40px;
+  position: relative;
+  z-index: 1;
+}
+.mindmap-root-inner {
+  display: inline-flex; align-items: center; gap: 12px;
+  background: linear-gradient(135deg, #319795 0%, #2C7A7B 100%);
+  color: white; font-weight: 800; font-size: 1.3rem;
+  padding: 16px 36px; border-radius: 60px;
+  box-shadow: 0 8px 24px rgba(49, 151, 149, 0.35);
+  letter-spacing: 0.02em;
+}
+.mindmap-branches {
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  align-items: flex-start;
+  position: relative;
+  z-index: 1;
+  flex-wrap: wrap;
+}
+.mindmap-branch {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 160px;
+  max-width: 220px;
+  position: relative;
+}
+.mindmap-col-node {
+  background: white;
+  border: 2px solid #E2E8F0;
+  border-radius: 16px;
+  padding: 14px 20px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #1A202C;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  width: 100%;
+  box-sizing: border-box;
+  position: relative;
+  transition: all 0.2s;
+  cursor: default;
+}
+.mindmap-col-node:hover {
+  border-color: #4FD1C5;
+  box-shadow: 0 8px 20px rgba(79, 209, 197, 0.2);
+  transform: translateY(-2px);
+}
+.mindmap-col-node .count {
+  display: inline-block;
+  background: #E6FFFA;
+  color: #319795;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 20px;
+  margin-left: 6px;
+}
+.mindmap-children {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  width: 100%;
+  position: relative;
+}
+.mindmap-children::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 2px;
+  height: 8px;
+  background: #CBD5E0;
+}
+.mindmap-card {
+  background: white;
+  border: 1.5px solid #EDF2F7;
+  border-radius: 12px;
+  padding: 10px 14px;
+  width: 100%;
+  box-sizing: border-box;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+  cursor: grab;
+  transition: all 0.2s;
+  position: relative;
+}
+.mindmap-card::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  width: 2px;
+  height: 8px;
+  background: #CBD5E0;
+  transform: translateX(-50%);
+}
+.mindmap-card:hover {
+  border-color: #BEE3F8;
+  box-shadow: 0 4px 12px rgba(49, 151, 149, 0.12);
+  transform: translateX(3px);
+}
+.mindmap-card:active { cursor: grabbing; }
+.mindmap-card h4 {
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin: 0 0 2px;
+  color: #1A202C;
+}
+.mindmap-card p {
+  font-size: 0.7rem;
+  color: #718096;
+  margin: 0;
+}
+.mindmap-card .card-actions {
+  display: flex;
+  gap: 4px;
+  margin-top: 6px;
+  justify-content: flex-end;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.mindmap-card:hover .card-actions { opacity: 1; }
+.mindmap-card.dragging { opacity: 0.4; transform: scale(0.95); }
+.mindmap-branch.drag-over > .mindmap-col-node {
+  border-color: #4FD1C5;
+  box-shadow: 0 0 0 3px rgba(79, 209, 197, 0.25), 0 8px 20px rgba(79, 209, 197, 0.2);
+  transform: translateY(-2px);
+}
+.mindmap-branch.drag-over > .mindmap-children::before,
+.mindmap-branch.drag-over .mindmap-card::before {
+  background: #4FD1C5;
+}
+.mindmap-card.drag-over {
+  border-color: #4FD1C5 !important;
+  background: #F0FFFA;
+  box-shadow: 0 4px 12px rgba(79, 209, 197, 0.2);
+  transform: translateX(5px);
+}
+
+/* Add card inline form */
+.add-card-inline {
+  margin-top: 6px;
+  width: 100%;
+}
+.add-card-inline form {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+.add-card-inline input {
+  flex: 1;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 0.75rem;
+  outline: none;
+  background: #F7FAFC;
+  min-width: 0;
+}
+.add-card-inline input:focus { border-color: #4FD1C5; background: white; }
+
+/* Connector line SVG */
+.mindmap-connectors {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+</style>
+</head>
+<body>
+<div class="flex" style="min-height: 100vh;">
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <img src="/uploads/logo.png" alt="ZETTA" class="logo-img">
+    <div>
+      <h1>ZETTA</h1>
+      <p>Funnel Pro</p>
+    </div>
+  </div>
+  <div class="sidebar-section">Menu</div>
+  <ul class="sidebar-nav">
+    <li><a href="/dashboard"><iconify-icon icon="heroicons:rectangle-group" class="nav-icon"></iconify-icon> Dashboard</a></li>
+    <li><a href="/funnels"><iconify-icon icon="heroicons:funnel" class="nav-icon"></iconify-icon> Funnels</a></li>
+    <li><a href="/leads"><iconify-icon icon="heroicons:users" class="nav-icon"></iconify-icon> Leads</a></li>
+    <li><a href="/automations"><iconify-icon icon="heroicons:bolt" class="nav-icon"></iconify-icon> Automations</a></li>
+    <li><a href="/scraper"><iconify-icon icon="heroicons:magnifying-glass" class="nav-icon"></iconify-icon> Capturar Leads</a></li>
+    <li><a href="/analytics"><iconify-icon icon="heroicons:chart-bar" class="nav-icon"></iconify-icon> Analytics</a></li>
+    <li class="active"><iconify-icon icon="heroicons:light-bulb" class="nav-icon"></iconify-icon> Estratégia</li>
+    <li><a href="/contratos"><iconify-icon icon="heroicons:document-text" class="nav-icon"></iconify-icon> Gerador de Contratos</a></li>
+    <li><a href="/settings"><iconify-icon icon="heroicons:cog-6-tooth" class="nav-icon"></iconify-icon> Configurações</a></li>
+  </ul>
+  <div class="sidebar-section">Conta</div>
+  <div style="padding: 0 16px;">
+    <a href="/logout" style="width:100%; font-size:0.8rem; padding:10px; background:#EDF2F7; color:#4A5568; border:none; border-radius:12px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:8px; text-decoration:none;">
+      <iconify-icon icon="heroicons:arrow-right-on-rectangle" style="width:16px;height:16px;"></iconify-icon> Sair
+    </a>
+  </div>
+</aside>
+
+<!-- Main -->
+<main style="margin-left:260px; flex:1; background:#FFFFFF; min-height:100vh;">
+
+  <header style="height:64px; border-bottom:1px solid #E2E8F0; padding:0 32px; display:flex; align-items:center; justify-content:space-between; background:rgba(255,255,255,0.9); position:sticky; top:0; z-index:40;">
+    <div style="display:flex; align-items:center; gap:16px;">
+      <iconify-icon icon="heroicons:light-bulb" style="width:22px;height:22px;color:#319795;"></iconify-icon>
+      <h2 style="font-size:1.2rem; font-weight:700; color:#1A202C; margin:0;">Mapa de Estratégia</h2>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <form method="POST" action="/strategy" style="display:flex;gap:8px;align-items:center;">
+        <input type="hidden" name="action" value="add_column"/>
+        <input type="text" name="titulo_coluna" placeholder="Nova coluna..." style="border:1px solid #E2E8F0; border-radius:8px; padding:6px 12px; font-size:0.8rem; outline:none; background:#F7FAFC; width:140px;"/>
+        <button type="submit" class="small-btn" style="padding:6px 12px;">
+          <iconify-icon icon="heroicons:plus" style="width:14px;height:14px;"></iconify-icon> Adicionar
+        </button>
+      </form>
+    </div>
+  </header>
+
+  <div style="padding:24px 32px;">
+
+    <div class="mindmap-wrapper" id="mindmap-wrapper">
+
+      <!-- Root Node -->
+      <div class="mindmap-root">
+        <div class="mindmap-root-inner">
+          <iconify-icon icon="heroicons:light-bulb" style="width:24px;height:24px;"></iconify-icon>
+          Mapa de Estratégia
+        </div>
+      </div>
+
+      <!-- Branches -->
+      <div class="mindmap-branches" id="mindmap-branches">
+
+        {% for col in board.colunas %}
+        {% set col_idx = loop.index0 %}
+        <div class="mindmap-branch" data-col="{{ col_idx }}">
+
+          <!-- Column Node -->
+          <div class="mindmap-col-node" data-col="{{ col_idx }}">
+            {{ col.titulo }}
+            <span class="count">{{ col.cartoes|length }}</span>
+          </div>
+
+          <!-- Cards -->
+          <div class="mindmap-children">
+            {% for card in col.cartoes %}
+            <div class="mindmap-card" draggable="true" data-card-id="{{ card.id }}" data-col="{{ col_idx }}">
+              <h4>{{ card.titulo }}</h4>
+              {% if card.descricao %}<p>{{ card.descricao }}</p>{% endif %}
+              <div class="card-actions">
+                <button class="small-btn danger" onclick="deletarCartao({{ card.id }})">
+                  <iconify-icon icon="heroicons:trash" style="width:12px;height:12px;"></iconify-icon>
+                </button>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+
+          <!-- Add card inline -->
+          <div class="add-card-inline">
+            <form method="POST" action="/strategy">
+              <input type="hidden" name="action" value="add_card"/>
+              <input type="hidden" name="col_idx" value="{{ loop.index0 }}"/>
+              <input type="hidden" name="descricao" value=""/>
+              <input type="text" name="titulo" placeholder="+ novo cartão" required/>
+              <button type="submit" class="small-btn" style="padding:6px 8px;">
+                <iconify-icon icon="heroicons:plus" style="width:12px;height:12px;"></iconify-icon>
+              </button>
+            </form>
+          </div>
+
+        </div>
+        {% endfor %}
+
+      </div>
+
+      <!-- SVG Connectors -->
+      <svg class="mindmap-connectors" id="mindmap-connectors"></svg>
+    </div>
+
+  </div>
+</main>
+</div>
+<script>
+(function() {
+  var hdr = document.querySelector('header');
+  window.addEventListener('scroll', function() { hdr.classList.toggle('scrolled', window.scrollY > 20); });
+
+  function drawConnectors() {
+    var wrapper = document.getElementById('mindmap-wrapper');
+    var root = wrapper.querySelector('.mindmap-root-inner');
+    var branches = wrapper.querySelectorAll('.mindmap-branch');
+    var svg = document.getElementById('mindmap-connectors');
+    if (!root || !branches.length || !svg) return;
+    var wrapperRect = wrapper.getBoundingClientRect();
+    var rootRect = root.getBoundingClientRect();
+    var rootX = rootRect.left - wrapperRect.left + rootRect.width / 2;
+    var rootY = rootRect.bottom - wrapperRect.top;
+    svg.setAttribute('width', wrapperRect.width);
+    svg.setAttribute('height', wrapperRect.height);
+    var html = '';
+    branches.forEach(function(branch) {
+      var colNode = branch.querySelector('.mindmap-col-node');
+      if (!colNode) return;
+      var colRect = colNode.getBoundingClientRect();
+      var colX = colRect.left - wrapperRect.left + colRect.width / 2;
+      var colY = colRect.top - wrapperRect.top;
+      var midY = (rootY + colY) / 2;
+      html += '<path d="M' + rootX + ',' + rootY +
+              ' C' + rootX + ',' + midY +
+              ' ' + colX + ',' + midY +
+              ' ' + colX + ',' + colY + '"' +
+              ' fill="none" stroke="#CBD5E0" stroke-width="2" opacity="0.6"/>';
+      var cards = branch.querySelectorAll('.mindmap-card');
+      cards.forEach(function(card) {
+        var cardRect = card.getBoundingClientRect();
+        var cardX = cardRect.left - wrapperRect.left + cardRect.width / 2;
+        var cardTop = cardRect.top - wrapperRect.top;
+        if (card.classList.contains('dragging')) return;
+        html += '<line x1="' + colX + '" y1="' + colY +
+                '" x2="' + colX + '" y2="' + cardTop + '"' +
+                ' stroke="#E2E8F0" stroke-width="1.5" opacity="0.5"/>';
+      });
+    });
+    svg.innerHTML = html;
+  }
+
+  var drawTimer;
+  function debouncedDraw() {
+    clearTimeout(drawTimer);
+    drawTimer = setTimeout(drawConnectors, 80);
+  }
+  window.addEventListener('load', debouncedDraw);
+  window.addEventListener('resize', debouncedDraw);
+  new MutationObserver(debouncedDraw).observe(
+    document.getElementById('mindmap-wrapper'),
+    { childList: true, subtree: true }
+  );
+
+  // ─── Fluid Drag & Drop ───
+  var draggedEl = null;
+
+  document.addEventListener('dragstart', function(e) {
+    var card = e.target.closest('.mindmap-card');
+    if (!card) return;
+    draggedEl = card;
+    card.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', card.dataset.cardId);
+  });
+
+  document.addEventListener('dragend', function(e) {
+    var card = e.target.closest('.mindmap-card');
+    if (card) card.classList.remove('dragging');
+    document.querySelectorAll('.mindmap-branch.drag-over').forEach(function(b) {
+      b.classList.remove('drag-over');
+    });
+    draggedEl = null;
+  });
+
+  document.addEventListener('dragover', function(e) {
+    var branch = e.target.closest('.mindmap-branch');
+    if (!branch) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    document.querySelectorAll('.mindmap-branch.drag-over').forEach(function(b) {
+      if (b !== branch) b.classList.remove('drag-over');
+    });
+    branch.classList.add('drag-over');
+  });
+
+  document.addEventListener('dragleave', function(e) {
+    var branch = e.target.closest('.mindmap-branch');
+    if (!branch) return;
+    // Only remove if leaving the branch entirely
+    if (!branch.contains(e.relatedTarget)) {
+      branch.classList.remove('drag-over');
+    }
+  });
+
+  document.addEventListener('drop', function(e) {
+    e.preventDefault();
+    var branch = e.target.closest('.mindmap-branch');
+    if (!branch || !draggedEl) return;
+
+    var destCol = parseInt(branch.dataset.col);
+    var srcCol = parseInt(draggedEl.dataset.col);
+    var cardId = parseInt(draggedEl.dataset.cardId);
+
+    // Don't move to the same column
+    if (destCol === srcCol) {
+      draggedEl.classList.remove('dragging');
+      draggedEl = null;
+      branch.classList.remove('drag-over');
+      return;
+    }
+
+    // Move DOM element
+    var childrenContainer = branch.querySelector('.mindmap-children');
+    if (childrenContainer) {
+      draggedEl.dataset.col = destCol;
+      childrenContainer.appendChild(draggedEl);
+    }
+
+    // Update count badges
+    document.querySelectorAll('.mindmap-branch').forEach(function(b) {
+      var countEl = b.querySelector('.count');
+      var cardCount = b.querySelectorAll('.mindmap-card').length;
+      if (countEl) countEl.textContent = cardCount;
+    });
+
+    // Redraw connectors immediately
+    debouncedDraw();
+
+    // Send to backend (no reload even on error)
+    fetch('/strategy/mover', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({card_id: cardId, destino_col: destCol})
+    }).then(function(r) {
+      if (!r.ok) console.error('Erro ao mover cartão');
+    });
+
+    draggedEl.classList.remove('dragging');
+    draggedEl = null;
+    branch.classList.remove('drag-over');
+  });
+
+  // ─── Delete (no reload) ───
+  window.deletarCartao = function(id) {
+    if (!confirm('Remover este cartão?')) return;
+    var card = document.querySelector('.mindmap-card[data-card-id="' + id + '"]');
+    fetch('/strategy/deletar', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({card_id: id})
+    }).then(function(r) {
+      if (r.ok) {
+        if (card) {
+          var branch = card.closest('.mindmap-branch');
+          card.remove();
+          if (branch) {
+            var countEl = branch.querySelector('.count');
+            var cardCount = branch.querySelectorAll('.mindmap-card').length;
+            if (countEl) countEl.textContent = cardCount;
+          }
+          debouncedDraw();
+        }
+      }
+    });
+  };
+})();
+</script>
+</body>
+</html>

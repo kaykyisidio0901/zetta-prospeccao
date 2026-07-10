@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html class="light" lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ZETTA FUNNEL PRO - Cadastro</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="https://cdn.jsdelivr.net/npm/iconify-icon@2.3.0/dist/iconify-icon.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+* { font-family: 'Inter', sans-serif; }
+body { background: linear-gradient(135deg, #E6FFFA 0%, #FFFFFF 50%, #F0FFF4 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; margin: 0; }
+.login-card {
+  background: white; border-radius: 20px; padding: 40px;
+  width: 100%; max-width: 400px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.08), 0 4px 14px rgba(0,0,0,0.04);
+  border: 1px solid #E2E8F0;
+}
+.login-card .logo-img {
+  width: 56px; height: 56px; object-fit: contain;
+  margin: 0 auto 16px; display: block;
+}
+.login-card h1 { text-align: center; font-size: 1.3rem; font-weight: 800; color: #1A202C; margin: 0 0 4px; }
+.login-card p { text-align: center; font-size: 0.85rem; color: #718096; margin: 0 0 24px; }
+.login-card label { font-size: 0.8rem; font-weight: 600; color: #4A5568; display: flex; flex-direction: column; gap: 4px; margin-bottom: 16px; }
+.login-card input {
+  border: 1px solid #E2E8F0; border-radius: 10px; padding: 10px 14px;
+  font-size: 0.9rem; outline: none; transition: border 0.15s; background: #F7FAFC; width: 100%; box-sizing: border-box;
+}
+.login-card input:focus { border-color: #4FD1C5; background: white; }
+.primary-btn {
+  background: #4FD1C5; color: #1A202C; border: none; border-radius: 12px;
+  padding: 12px 24px; font-weight: 700; font-size: 0.9rem; width: 100%;
+  box-shadow: 0 4px 14px 0 rgba(79, 209, 197, 0.4);
+  transition: all 0.2s; cursor: pointer;
+}
+.primary-btn:hover { transform: translateY(-2px); background: #38B2AC; box-shadow: 0 6px 20px 0 rgba(79, 209, 197, 0.6); }
+.erro-msg { background: #FFF5F5; border-left: 4px solid #FC8181; border-radius: 8px; padding: 12px 16px; font-size: 0.85rem; color: #C53030; margin-bottom: 16px; }
+</style>
+</head>
+<body>
+<div class="login-card">
+  <img src="/uploads/logo.png" alt="ZETTA" class="logo-img">
+  <h1>Criar Conta</h1>
+  <p>Cadastre-se para usar o ZETTA Funnel Pro</p>
+  {% if erro %}<div class="erro-msg">{{ erro }}</div>{% endif %}
+  <form method="POST" action="/register">
+    <label>
+      Usuário
+      <input type="text" name="username" placeholder="Crie um nome de usuário" required autofocus/>
+    </label>
+    <label>
+      Senha
+      <input type="password" name="password" placeholder="Crie uma senha" required/>
+    </label>
+    <button type="submit" class="primary-btn" style="margin-top:8px;">Criar Conta</button>
+  </form>
+  <p style="text-align:center; margin-top:20px; font-size:0.8rem; color:#718096;">
+    Já tem conta? <a href="/login" style="color:#319795; font-weight:600; text-decoration:none;">Faça login</a>
+  </p>
+</div>
+</body>
+</html>

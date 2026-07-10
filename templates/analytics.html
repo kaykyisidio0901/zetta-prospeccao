@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html class="light" lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ZETTA FUNNEL PRO - Analytics</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="https://cdn.jsdelivr.net/npm/iconify-icon@2.3.0/dist/iconify-icon.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+* { font-family: 'Inter', sans-serif; }
+body { background-color: #FFFFFF; color: #1A202C; margin: 0; }
+
+.sidebar {
+  position: fixed; left: 0; top: 0; height: 100%; width: 260px;
+  background: #F8F9FA; border-right: 1px solid #E2E8F0;
+  display: flex; flex-direction: column; z-index: 50;
+}
+.sidebar-brand {
+  display: flex; align-items: center; gap: 10px;
+  padding: 20px 20px 16px;
+}
+.sidebar-brand .logo-img {
+  width: 40px; height: 40px; object-fit: contain;
+  border-radius: 6px;
+}.sidebar-brand h1 { color: #006a63; font-size: 1.15rem; font-weight: 800; margin: 0; line-height: 1.2; }
+.sidebar-brand p { color: #6c7a77; font-size: 0.6rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; margin: 0; }
+.sidebar-nav { list-style: none; padding: 0 8px; margin: 0 0 16px; }
+.sidebar-nav li {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 16px; margin: 2px 0; border-radius: 10px;
+  font-size: 0.85rem; font-weight: 500; color: #4A5568;
+  cursor: default; transition: all 0.15s;
+}
+.sidebar-nav li:hover { background: #EDF2F7; }
+.sidebar-nav li.active {
+  background: #E6FFFA; color: #319795; font-weight: 700;
+  box-shadow: inset 3px 0 0 0 #319795;
+}
+.sidebar-nav li .nav-icon { width: 22px; height: 22px; flex-shrink: 0; }
+.sidebar-nav li.active .nav-icon { color: #319795; }
+.sidebar-nav li a { text-decoration: none; color: inherit; display: flex; align-items: center; gap: 12px; width: 100%; }
+.sidebar-section {
+  font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.08em; color: #A0AEC0; padding: 16px 20px 6px;
+}
+
+.metric-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;
+}
+.metric-card {
+  background: #FFFFFF; border: 1px solid #E2E8F0;
+  border-radius: 16px; padding: 24px;
+  box-shadow: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -2px rgba(0,0,0,0.04);
+  transition: all 0.2s;
+}
+.metric-card:hover {
+  box-shadow: 0 14px 20px -4px rgba(0,0,0,0.12), 0 6px 10px -2px rgba(0,0,0,0.06);
+  transform: translateY(-2px);
+}
+.metric-label {
+  font-size: 0.75rem; font-weight: 600; color: #718096;
+  text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 8px;
+}
+.metric-value {
+  font-size: 1.8rem; font-weight: 800; color: #319795;
+  margin: 0 0 4px; line-height: 1.1;
+}
+.metric-sub {
+  font-size: 0.75rem; color: #A0AEC0; margin: 0;
+}
+
+.empty-state {
+  text-align: center; padding: 64px 24px;
+  border: 2px dashed #E2E8F0; border-radius: 16px;
+  background: #F7FAFC;
+}
+.empty-state .empty-icon { width: 48px; height: 48px; color: #A0AEC0; margin-bottom: 16px; }
+.empty-state h3 { font-size: 1.1rem; font-weight: 700; color: #1A202C; margin: 0 0 8px; }
+.empty-state p { font-size: 0.85rem; color: #718096; margin: 0; }
+
+.info-banner {
+  background: #E6FFFA; border-left: 4px solid #4FD1C5; border-radius: 8px;
+  padding: 14px 18px; display: flex; align-items: flex-start; gap: 10px; margin-bottom: 28px;
+}
+.info-banner .banner-icon { width: 20px; height: 20px; color: #319795; flex-shrink: 0; margin-top: 1px; }
+.info-banner .label {
+  font-size: 0.7rem; font-weight: 700; color: #319795;
+  text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 2px;
+}
+.info-banner p { font-size: 0.85rem; color: #1A202C; margin: 0; }
+
+header.scrolled { box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+</style>
+</head>
+<body>
+<div class="flex" style="min-height: 100vh;">
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <img src="/uploads/logo.png" alt="ZETTA" class="logo-img">
+    <div>
+      <h1>ZETTA</h1>
+      <p>Funnel Pro</p>
+    </div>
+  </div>
+  <div class="sidebar-section">Menu</div>
+  <ul class="sidebar-nav">
+    <li><a href="/dashboard"><iconify-icon icon="heroicons:rectangle-group" class="nav-icon"></iconify-icon> Dashboard</a></li>
+    <li><a href="/funnels"><iconify-icon icon="heroicons:funnel" class="nav-icon"></iconify-icon> Funnels</a></li>
+    <li><a href="/leads"><iconify-icon icon="heroicons:users" class="nav-icon"></iconify-icon> Leads</a></li>
+    <li><a href="/automations"><iconify-icon icon="heroicons:bolt" class="nav-icon"></iconify-icon> Automations</a></li>
+    <li><a href="/scraper"><iconify-icon icon="heroicons:magnifying-glass" class="nav-icon"></iconify-icon> Capturar Leads</a></li>
+    <li class="active"><iconify-icon icon="heroicons:chart-bar" class="nav-icon"></iconify-icon> Analytics</li>
+    <li><a href="/contratos"><iconify-icon icon="heroicons:document-text" class="nav-icon"></iconify-icon> Gerador de Contratos</a></li>
+  </ul>
+  <div class="sidebar-section">Ações</div>
+  <div style="padding: 0 16px;">
+    <a href="/contratos" class="primary-btn" style="width:100%; font-size:0.8rem; padding:10px; background:#4FD1C5; color:#1A202C; border:none; border-radius:12px; font-weight:700; box-shadow:0 4px 14px 0 rgba(79,209,197,0.4); transition:all 0.2s; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:8px; text-decoration:none;">
+      <iconify-icon icon="heroicons:plus" style="width:16px;height:16px;"></iconify-icon> Novo Contrato
+    </a>
+  </div>
+</aside>
+
+<!-- Main -->
+<main style="margin-left:260px; flex:1; background:#FFFFFF; min-height:100vh;">
+
+  <header style="height:64px; border-bottom:1px solid #E2E8F0; padding:0 32px; display:flex; align-items:center; justify-content:space-between; background:rgba(255,255,255,0.9); position:sticky; top:0; z-index:40;">
+    <div style="display:flex; align-items:center; gap:16px;">
+      <iconify-icon icon="heroicons:chart-bar" style="width:22px;height:22px;color:#319795;"></iconify-icon>
+      <h2 style="font-size:1.2rem; font-weight:700; color:#1A202C; margin:0;">Analytics Financeiro</h2>
+    </div>
+  </header>
+
+  <div style="padding:32px; max-width:1280px; margin:0 auto;">
+
+    {% if total_contratos == 0 %}
+    <!-- Empty state -->
+    <div class="empty-state">
+      <iconify-icon icon="heroicons:chart-bar" class="empty-icon"></iconify-icon>
+      <h3>Nenhum contrato gerado este mês</h3>
+      <p>Os dados financeiros aparecerão aqui automaticamente assim que você<br/>gerar o primeiro contrato na página de Gerador de Contratos.</p>
+      <a href="/contratos" style="display:inline-block; margin-top:20px; background:#4FD1C5; color:#1A202C; border:none; border-radius:12px; padding:12px 28px; font-weight:700; font-size:0.9rem; box-shadow:0 4px 14px 0 rgba(79,209,197,0.4); text-decoration:none; transition:all 0.2s;">
+        <iconify-icon icon="heroicons:document-text" style="width:18px;height:18px;"></iconify-icon> Gerar Primeiro Contrato
+      </a>
+    </div>
+    {% else %}
+
+    <!-- Info banner -->
+    <div class="info-banner">
+      <iconify-icon icon="heroicons:currency-dollar" class="banner-icon"></iconify-icon>
+      <div>
+        <p class="label">Panorama Financeiro</p>
+        <p>
+          <strong>{{ total_contratos }} contrato{{ 's' if total_contratos != 1 else '' }}</strong> gerado{{ 's' if total_contratos != 1 else '' }} —
+          custo operacional simulado de <strong>5%</strong> sobre o faturamento bruto.
+        </p>
+      </div>
+    </div>
+
+    <!-- Metric cards -->
+    <div class="metric-grid">
+
+      <div class="metric-card">
+        <p class="metric-label">Faturamento Bruto</p>
+        <p class="metric-value">R$ {{ "%.2f"|format(faturamento_bruto)|replace(".",",") }}</p>
+        <p class="metric-sub">Total acumulado de todos os projetos</p>
+      </div>
+
+      <div class="metric-card">
+        <p class="metric-label">Caixa Atual (Sinal)</p>
+        <p class="metric-value">R$ {{ "%.2f"|format(caixa_atual)|replace(".",",") }}</p>
+        <p class="metric-sub">Total de entradas recebidas</p>
+      </div>
+
+      <div class="metric-card">
+        <p class="metric-label">Lucro Líquido</p>
+        <p class="metric-value">R$ {{ "%.2f"|format(lucro_liquido)|replace(".",",") }}</p>
+        <p class="metric-sub">Bruto - {{ "%.2f"|format(custo_operacional)|replace(".",",") }} (5% custos)</p>
+      </div>
+
+      <div class="metric-card">
+        <p class="metric-label">Ticket Médio</p>
+        <p class="metric-value">R$ {{ "%.2f"|format(ticket_medio)|replace(".",",") }}</p>
+        <p class="metric-sub">Valor médio por contrato</p>
+      </div>
+
+    </div>
+
+    <!-- Detailed table -->
+    <div style="margin-top:32px; background:#FFFFFF; border:1px solid #E2E8F0; border-radius:16px; overflow:hidden; box-shadow:0 10px 15px -3px rgba(0,0,0,0.08);">
+      <div style="padding:20px 24px; border-bottom:1px solid #E2E8F0; display:flex; align-items:center; gap:10px;">
+        <iconify-icon icon="heroicons:clipboard-document-list" style="width:20px;height:20px;color:#319795;"></iconify-icon>
+        <h3 style="font-size:0.95rem; font-weight:700; color:#1A202C; margin:0;">Histórico de Contratos</h3>
+      </div>
+      <div style="overflow-x:auto;">
+        <table style="width:100%; border-collapse:collapse; font-size:0.85rem;">
+          <thead>
+            <tr style="background:#F7FAFC; border-bottom:1px solid #E2E8F0;">
+              <th style="text-align:left; padding:12px 20px; font-weight:600; color:#4A5568;">Cliente</th>
+              <th style="text-align:left; padding:12px 20px; font-weight:600; color:#4A5568;">Valor Projeto</th>
+              <th style="text-align:left; padding:12px 20px; font-weight:600; color:#4A5568;">Sinal Recebido</th>
+              <th style="text-align:left; padding:12px 20px; font-weight:600; color:#4A5568;">Prazo</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for c in dados_json.get("contratos", []) %}
+            <tr style="border-bottom:1px solid #EDF2F7;">
+              <td style="padding:12px 20px; font-weight:600; color:#1A202C;">{{ c.cliente }}</td>
+              <td style="padding:12px 20px; color:#319795; font-weight:700;">R$ {{ "%.2f"|format(c.valor_projeto)|replace(".",",") }}</td>
+              <td style="padding:12px 20px; color:#319795; font-weight:700;">R$ {{ "%.2f"|format(c.valor_entrada)|replace(".",",") }}</td>
+              <td style="padding:12px 20px; color:#718096;">{{ c.prazo_dias }} dias</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
+</main>
+</div>
+<script>
+var hdr = document.querySelector('header');
+window.addEventListener('scroll', function() { hdr.classList.toggle('scrolled', window.scrollY > 20); });
+</script>
+</body>
+</html>
