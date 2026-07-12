@@ -1,0 +1,11 @@
+__pycache__
+*.pyc
+*.pyo
+*.db
+.env
+.flask_env
+venv/
+.venv/
+.git
+uploads/
+*.pdf
