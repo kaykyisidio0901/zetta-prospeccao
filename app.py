@@ -272,7 +272,7 @@ def register():
                 return redirect(url_for("dashboard"))
             except Exception as e:
                 print(f"REGISTER ERROR: {e}", flush=True)
-                erro = "Erro ao cadastrar. Tente novamente."
+                erro = f"Erro ao cadastrar: {e}"
     return render_template("register.html", erro=erro)
 
 
