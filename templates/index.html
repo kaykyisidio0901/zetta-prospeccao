@@ -153,6 +153,12 @@ header.scrolled { box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
       <button onclick="limparLeads()" title="Limpar todos os leads" style="background:none;border:none;cursor:pointer;padding:4px;display:flex;align-items:center;color:#E53E3E;">
         <iconify-icon icon="heroicons:trash" style="width:20px;height:20px;"></iconify-icon>
       </button>
+      <form id="csv-upload-form-header" action="/leads" method="POST" enctype="multipart/form-data" style="display:inline;">
+        <input type="file" id="csv-file-input-header" name="csv_file" accept=".csv" style="display:none;" onchange="this.form.submit()"/>
+        <button type="button" title="Importar CSV" onclick="document.getElementById('csv-file-input-header').click()" style="background:none;border:none;cursor:pointer;padding:4px;display:flex;align-items:center;color:#319795;">
+          <iconify-icon icon="heroicons:document-arrow-up" style="width:20px;height:20px;"></iconify-icon>
+        </button>
+      </form>
       <iconify-icon icon="heroicons:bell" style="width:20px;height:20px;color:#A0AEC0;cursor:pointer;"></iconify-icon>
       <iconify-icon icon="heroicons:question-mark-circle" style="width:20px;height:20px;color:#A0AEC0;cursor:pointer;"></iconify-icon>
     </div>
@@ -168,7 +174,13 @@ header.scrolled { box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
       <p style="font-size:0.9rem; color:#718096; margin:0 0 20px;">
         Faça upload de um arquivo CSV ou use o Scraper para capturar leads do Google Maps.
       </p>
-      <div style="display:flex; gap:12px; justify-content:center;">
+      <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+        <form id="csv-upload-form" action="/leads" method="POST" enctype="multipart/form-data" style="display:inline;">
+          <input type="file" id="csv-file-input" name="csv_file" accept=".csv" style="display:none;" onchange="this.form.submit()"/>
+          <button type="button" class="primary-btn" onclick="document.getElementById('csv-file-input').click()" style="text-decoration:none;">
+            <iconify-icon icon="heroicons:document-arrow-up" style="width:18px;height:18px;"></iconify-icon> Importar CSV
+          </button>
+        </form>
         <a href="/scraper" class="primary-btn" style="text-decoration:none;">
           <iconify-icon icon="heroicons:magnifying-glass" style="width:18px;height:18px;"></iconify-icon> Capturar do Maps
         </a>
