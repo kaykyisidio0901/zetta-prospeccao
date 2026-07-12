@@ -93,7 +93,16 @@ def _init_db():
 
 @app.before_request
 def _ensure_db():
-    _init_db()
+    try:
+        _init_db()
+    except Exception as e:
+        print(f"DB INIT ERROR: {e}", flush=True)
+
+
+@app.errorhandler(500)
+def handle_500(e):
+    import traceback
+    return f"<pre>Erro 500:\n{traceback.format_exc()}</pre>", 500
 
 
 def login_required(f):
