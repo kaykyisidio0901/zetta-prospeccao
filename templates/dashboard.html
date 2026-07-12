@@ -452,6 +452,7 @@ var achievements = [
   { id: 7, title: "1 MILHÃO", target: 1000000, display: "1 MILHÃO", subtitle: "DE VENDAS", big: true },
 ];
 var totalVendas = {{ faturamento }};
+var conquistasSalvas = {{ conquistas_json|safe }};
 
 // ─── Canvas Particles ───
 (function initParticles() {
@@ -806,6 +807,7 @@ setInterval(function() {
     .then(function(d) {
       if (d.faturamento !== totalVendas) {
         totalVendas = d.faturamento;
+        if (d.conquistas) conquistasSalvas = d.conquistas;
         renderAchievements();
       }
     })

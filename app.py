@@ -1,34 +1,63 @@
+import csv
 import io
 import json
 import os
 import re
 import sqlite3
+import sys
 import time
 import zipfile
 from functools import wraps
-
-import pandas as pd
 from flask import (Flask, render_template, request, jsonify, send_file,
                    send_from_directory, session, redirect, url_for)
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 
-from ia_motor import gerar_funil_vendas
-from whatsapp import gerar_link_whatsapp
-from replicas import gerar_replica
-from contrato import gerar_pdf_contrato
-from scraper import raspar_google_maps
+try:
+    from ia_motor import gerar_funil_vendas
+except Exception:
+    gerar_funil_vendas = None
 
-app = Flask(__name__)
-app.secret_key = os.urandom(24)
+try:
+    from whatsapp import gerar_link_whatsapp
+except Exception:
+    gerar_link_whatsapp = None
 
-ARQUIVO_DADOS = os.path.join(os.path.dirname(__file__), "dados_funnels.json")
-BANCO = os.path.join(os.path.dirname(__file__), "users.db")
-UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), "uploads")
+try:
+    from replicas import gerar_replica
+except Exception:
+    gerar_replica = None
+
+try:
+    from scraper import raspar_google_maps
+    SCRAPER_OK = True
+except Exception:
+    SCRAPER_OK = False
+
+
+def _lazy_gerar_pdf_contrato(**kwargs):
+    from contrato import gerar_pdf_contrato
+    return gerar_pdf_contrato(**kwargs)
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+app = Flask(__name__, template_folder=os.path.join(BASE_DIR, "templates"),
+            static_folder=os.path.join(BASE_DIR, "uploads"))
+app.secret_key = os.environ.get("SECRET_KEY", os.urandom(24).hex())
+
+ARQUIVO_DADOS = os.path.join(BASE_DIR, "dados_funnels.json")
+BANCO = os.path.join(BASE_DIR, "users.db")
+UPLOAD_FOLDER = os.path.join(BASE_DIR, "uploads")
+
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+_db_initialized = False
 
 
 def _init_db():
+    global _db_initialized
+    if _db_initialized:
+        return
     with sqlite3.connect(BANCO) as conn:
         conn.execute("""
             CREATE TABLE IF NOT EXISTS users (
@@ -46,9 +75,12 @@ def _init_db():
                 FOREIGN KEY (user_id) REFERENCES users(id)
             )
         """)
+    _db_initialized = True
 
 
-_init_db()
+@app.before_request
+def _ensure_db():
+    _init_db()
 
 
 def login_required(f):
@@ -95,6 +127,34 @@ def _salvar_dados(dados):
         json.dump(dados, f, ensure_ascii=False, indent=2)
 
 
+CONQUISTAS_METAS = [
+    {"id": 1, "title": "5 MIL", "target": 5000, "display": "5K", "subtitle": "DE VENDAS"},
+    {"id": 2, "title": "10 MIL", "target": 10000, "display": "10K", "subtitle": "DE VENDAS"},
+    {"id": 3, "title": "20 MIL", "target": 20000, "display": "20K", "subtitle": "DE VENDAS"},
+    {"id": 4, "title": "30 MIL", "target": 30000, "display": "30K", "subtitle": "DE VENDAS"},
+    {"id": 5, "title": "50 MIL", "target": 50000, "display": "50K", "subtitle": "DE VENDAS"},
+    {"id": 6, "title": "100 MIL", "target": 100000, "display": "100K", "subtitle": "DE VENDAS"},
+    {"id": 7, "title": "1 MILHÃO", "target": 1000000, "display": "1 MILHÃO", "subtitle": "DE VENDAS", "big": True},
+]
+
+
+def _verificar_e_salvar_conquistas(dados, faturamento):
+    conquistas = dados.get("conquistas", [])
+    ids_salvos = {c["id"] for c in conquistas}
+    for meta in CONQUISTAS_METAS:
+        if meta["target"] <= faturamento and meta["id"] not in ids_salvos:
+            conquistas.append({
+                "id": meta["id"],
+                "title": meta["title"],
+                "target": meta["target"],
+                "display": meta["display"],
+                "subtitle": meta["subtitle"],
+                "desbloqueada_em": time.strftime("%Y-%m-%d %H:%M:%S"),
+            })
+    dados["conquistas"] = conquistas
+    return conquistas
+
+
 def auto_detectar_coluna(colunas: list, palavras_chave: list) -> int:
     for i, col in enumerate(colunas):
         col_lower = col.lower().strip()
@@ -108,10 +168,16 @@ def carregar_csv(arquivo):
     raw = arquivo.read()
     for enc in ("utf-8", "latin1", "cp1252"):
         try:
-            return pd.read_csv(io.BytesIO(raw), encoding=enc)
-        except UnicodeDecodeError:
+            text = raw.decode(enc)
+            reader = csv.DictReader(io.StringIO(text))
+            rows = list(reader)
+            cols = reader.fieldnames or []
+            return cols, rows
+        except (UnicodeDecodeError, csv.Error):
             continue
-    return pd.read_csv(io.BytesIO(raw), encoding="utf-8")
+    text = raw.decode("utf-8", errors="replace")
+    reader = csv.DictReader(io.StringIO(text))
+    return reader.fieldnames or [], list(reader)
 
 
 def limpar_url(url: str) -> str:
@@ -324,8 +390,7 @@ def index():
         if not csv_file or not csv_file.filename.endswith(".csv"):
             erro = "Envie um arquivo CSV válido."
         else:
-            df = carregar_csv(csv_file)
-            colunas = df.columns.tolist()
+            colunas, rows = carregar_csv(csv_file)
 
             chaves_nome = ["nome", "name", "empresa", "business", "razao", "titulo", "title"]
             chaves_tel = ["telefone", "phone", "whatsapp", "celular", "contato", "tel", "fone"]
@@ -347,10 +412,12 @@ def index():
 
             tem_coluna_site = col_site in colunas
 
-            for _, row in df.iterrows():
-                nome = str(row[col_nome]).strip() if pd.notna(row[col_nome]) else "Sem nome"
-                telefone = str(row[col_telefone]).strip() if pd.notna(row[col_telefone]) else ""
-                segmento = str(row[col_segmento]).strip() if col_segmento and pd.notna(row[col_segmento]) else "geral"
+            for row in rows:
+                nome = str(row.get(col_nome, "")).strip() or "Sem nome"
+                telefone = str(row.get(col_telefone, "")).strip()
+                segmento = str(row.get(col_segmento, "")).strip() if col_segmento else "geral"
+                if not segmento or segmento.lower() in ("", "nan", "none"):
+                    segmento = "geral"
                 if re.search(r'https?://|www\.|google\.com/maps', segmento, re.IGNORECASE):
                     segmento = "geral"
 
@@ -363,9 +430,11 @@ def index():
 
                 url_site = ""
                 tem_site = False
-                if tem_coluna_site and pd.notna(row[col_site]):
-                    raw_url = str(row[col_site]).strip()
-                    cleaned = limpar_url(raw_url)
+                if tem_coluna_site:
+                    raw_site = row.get(col_site, "")
+                    if raw_site and raw_site.lower() not in ("", "nan", "none"):
+                        raw_url = str(raw_site).strip()
+                        cleaned = limpar_url(raw_url)
                     if cleaned and re.match(r"https?://[^\s/$.?#].[^\s]*", cleaned, re.IGNORECASE):
                         url_site = cleaned
                         tem_site = True
@@ -391,7 +460,8 @@ def index():
                 l["status"] = "abordar"
 
             dados = _ler_dados()
-            dados["leads"] = leads
+            existentes = dados.get("leads", [])
+            dados["leads"] = existentes + leads
             _salvar_dados(dados)
 
             stats = {
@@ -473,7 +543,7 @@ def contratos():
             })
             _salvar_dados(dados_json)
 
-            pdf = gerar_pdf_contrato(
+            pdf = _lazy_gerar_pdf_contrato(
                 cliente_nome=dados["cliente_nome"],
                 cliente_doc=dados["cliente_doc"],
                 valor_projeto=dados["valor_projeto"],
@@ -520,7 +590,7 @@ def contratos_massa():
         for lead in leads_fechados:
             nome = lead.get("nome", "Cliente")
             doc_placeholder = "00000000000"
-            pdf = gerar_pdf_contrato(
+            pdf = _lazy_gerar_pdf_contrato(
                 cliente_nome=nome,
                 cliente_doc=doc_placeholder,
                 valor_projeto=valor_projeto,
@@ -582,7 +652,7 @@ def gerar_contrato_lead():
     })
     _salvar_dados(dados_json)
 
-    pdf = gerar_pdf_contrato(
+    pdf = _lazy_gerar_pdf_contrato(
         cliente_nome=cliente_nome,
         cliente_doc=cliente_doc,
         valor_projeto=valor_projeto,
@@ -641,6 +711,9 @@ def dashboard():
     pct_sem_site = 100 - pct_site
     faturamento = sum(c.get("valor_projeto", 0) for c in contratos)
 
+    conquistas = _verificar_e_salvar_conquistas(dados, faturamento)
+    _salvar_dados(dados)
+
     return render_template(
         "dashboard.html",
         total=total,
@@ -651,6 +724,7 @@ def dashboard():
         pct_site=pct_site,
         pct_sem_site=pct_sem_site,
         faturamento=faturamento,
+        conquistas_json=json.dumps(conquistas, ensure_ascii=False),
         username=session.get("username", ""),
     )
 
@@ -661,7 +735,9 @@ def api_faturamento():
     dados = _ler_dados()
     contratos = dados.get("contratos", [])
     total = sum(c.get("valor_projeto", 0) for c in contratos)
-    return jsonify({"faturamento": total})
+    conquistas = _verificar_e_salvar_conquistas(dados, total)
+    _salvar_dados(dados)
+    return jsonify({"faturamento": total, "conquistas": conquistas})
 
 
 @app.route("/automations", methods=["GET"])
@@ -752,6 +828,16 @@ def funnels_salvar_base():
     return jsonify({"ok": True})
 
 
+@app.route("/limpar_leads", methods=["POST"])
+@login_required
+def limpar_leads():
+    dados = _ler_dados()
+    leads = dados.get("leads", [])
+    dados["leads"] = [l for l in leads if l.get("status") not in ("abordar", "")]
+    _salvar_dados(dados)
+    return jsonify({"ok": True})
+
+
 @app.route("/scraper", methods=["GET", "POST"])
 @login_required
 def scraper():
@@ -760,52 +846,55 @@ def scraper():
     url = ""
 
     if request.method == "POST":
-        url = request.form.get("url_maps", "").strip()
-        if not url:
-            erro = "Cole um link do Google Maps."
-        elif "google.com/maps" not in url and "maps.google" not in url:
-            erro = "O link precisa ser uma busca do Google Maps."
+        if not SCRAPER_OK:
+            erro = "Scraper indisponível no servidor. Use a importação de CSV."
         else:
-            try:
-                leads_encontrados = raspar_google_maps(url, max_resultados=10)
+            url = request.form.get("url_maps", "").strip()
+            if not url:
+                erro = "Cole um link do Google Maps."
+            elif "google.com/maps" not in url and "maps.google" not in url:
+                erro = "O link precisa ser uma busca do Google Maps."
+            else:
+                try:
+                    leads_encontrados = raspar_google_maps(url, max_resultados=10)
 
-                if leads_encontrados:
-                    dados = _ler_dados()
-                    novos = []
-                    for l in leads_encontrados:
-                        nome = l["nome"]
-                        segmento = "geral"
-                        telefone = l["telefone"]
+                    if leads_encontrados:
+                        dados = _ler_dados()
+                        novos = []
+                        for l in leads_encontrados:
+                            nome = l["nome"]
+                            segmento = "geral"
+                            telefone = l["telefone"]
 
-                        msg1, msg2, msg3 = gerar_funil_vendas(nome, segmento)
+                            msg1, msg2, msg3 = gerar_funil_vendas(nome, segmento)
 
-                        from whatsapp import limpar_numero, garantir_codigo_pais
-                        telefone_limpo = garantir_codigo_pais(limpar_numero(telefone)) if telefone else ""
-                        link_whats = gerar_link_whatsapp(telefone, msg1) if telefone else ""
-                        iniciais = "".join(w[0] for w in nome.split()[:2]).upper()
+                            from whatsapp import limpar_numero, garantir_codigo_pais
+                            telefone_limpo = garantir_codigo_pais(limpar_numero(telefone)) if telefone else ""
+                            link_whats = gerar_link_whatsapp(telefone, msg1) if telefone else ""
+                            iniciais = "".join(w[0] for w in nome.split()[:2]).upper()
 
-                        url_site = l.get("site", "")
-                        tem_site = bool(url_site)
+                            url_site = l.get("site", "")
+                            tem_site = bool(url_site)
 
-                        novos.append({
-                            "nome": nome,
-                            "telefone": telefone,
-                            "telefone_limpo": telefone_limpo,
-                            "segmento": segmento,
-                            "msg1": msg1,
-                            "msg2": msg2,
-                            "msg3": msg3,
-                            "link": link_whats,
-                            "iniciais": iniciais,
-                            "tem_site": tem_site,
-                            "url_site": url_site,
-                            "status": "abordar",
-                        })
+                            novos.append({
+                                "nome": nome,
+                                "telefone": telefone,
+                                "telefone_limpo": telefone_limpo,
+                                "segmento": segmento,
+                                "msg1": msg1,
+                                "msg2": msg2,
+                                "msg3": msg3,
+                                "link": link_whats,
+                                "iniciais": iniciais,
+                                "tem_site": tem_site,
+                                "url_site": url_site,
+                                "status": "abordar",
+                            })
 
-                    dados["leads"] = novos + dados.get("leads", [])
-                    _salvar_dados(dados)
-            except Exception as e:
-                erro = f"Erro ao raspar: {str(e)}"
+                        dados["leads"] = novos + dados.get("leads", [])
+                        _salvar_dados(dados)
+                except Exception as e:
+                    erro = f"Erro ao raspar: {str(e)}"
 
     return render_template(
         "scraper.html",
@@ -825,7 +914,7 @@ def uploaded_file(filename):
 @login_required
 def plaque_component():
     return send_from_directory(
-        os.path.join(os.path.dirname(__file__), "templates"),
+        os.path.join(BASE_DIR, "templates"),
         "plaque_component.html",
     )
 

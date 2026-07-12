@@ -150,6 +150,9 @@ header.scrolled { box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
         <iconify-icon icon="heroicons:magnifying-glass" style="width:16px;height:16px;color:#A0AEC0;"></iconify-icon>
         <input type="text" placeholder="Buscar lead..." style="border:none;outline:none;background:transparent;font-size:0.85rem;width:160px;color:#1A202C;" id="search-input"/>
       </div>
+      <button onclick="limparLeads()" title="Limpar todos os leads" style="background:none;border:none;cursor:pointer;padding:4px;display:flex;align-items:center;color:#E53E3E;">
+        <iconify-icon icon="heroicons:trash" style="width:20px;height:20px;"></iconify-icon>
+      </button>
       <iconify-icon icon="heroicons:bell" style="width:20px;height:20px;color:#A0AEC0;cursor:pointer;"></iconify-icon>
       <iconify-icon icon="heroicons:question-mark-circle" style="width:20px;height:20px;color:#A0AEC0;cursor:pointer;"></iconify-icon>
     </div>
@@ -448,6 +451,17 @@ function toggleContrato(idx) {
   var isHidden = area.style.display === 'none';
   area.style.display = isHidden ? 'block' : 'none';
   if (chevron) chevron.style.transform = isHidden ? 'rotate(180deg)' : '';
+}
+
+function limparLeads() {
+  if (!confirm('Tem certeza? Isso vai apagar TODOS os leads e não pode ser desfeito.')) return;
+  fetch('/limpar_leads', { method: 'POST' })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (d.ok) location.reload();
+      else alert('Erro ao limpar leads.');
+    })
+    .catch(function() { alert('Erro de conexão.'); });
 }
 
 function gerarContratoLead(idx, contratoIdx, nome) {
