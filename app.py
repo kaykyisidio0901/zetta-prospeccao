@@ -11,8 +11,6 @@ from flask import (Flask, render_template, request, jsonify, send_file,
                    send_from_directory, session, redirect, url_for)
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
-import psycopg2
-import psycopg2.extras
 
 try:
     from ia_motor import gerar_funil_vendas
@@ -47,56 +45,31 @@ app = Flask(__name__, template_folder=os.path.join(BASE_DIR, "templates"),
 app.secret_key = os.environ.get("SECRET_KEY", os.urandom(24).hex())
 
 ARQUIVO_DADOS = os.path.join(BASE_DIR, "dados_funnels.json")
-DATABASE_URL = os.environ.get("DATABASE_URL", "")
+ARQUIVO_USERS = os.path.join(BASE_DIR, "users.json")
 UPLOAD_FOLDER = os.path.join(BASE_DIR, "uploads")
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 
-def _get_db():
-    if not DATABASE_URL:
-        raise RuntimeError("DATABASE_URL não configurada. Adicione no painel do Render.")
-    url = DATABASE_URL
-    if "?" not in url:
-        url += "?sslmode=require"
-    return psycopg2.connect(url)
+def _ler_users():
+    if not os.path.exists(ARQUIVO_USERS):
+        return {"users": [], "settings": {}}
+    with open(ARQUIVO_USERS, "r", encoding="utf-8") as f:
+        return json.load(f)
 
 
-_db_initialized = False
+def _salvar_users(data):
+    with open(ARQUIVO_USERS, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
 
 
 def _init_db():
-    global _db_initialized
-    if _db_initialized:
-        return
-    conn = _get_db()
-    cur = conn.cursor()
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS users (
-            id SERIAL PRIMARY KEY,
-            username TEXT UNIQUE NOT NULL,
-            password TEXT NOT NULL
-        )
-    """)
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS user_settings (
-            user_id INTEGER PRIMARY KEY REFERENCES users(id),
-            company_name TEXT DEFAULT '',
-            whatsapp_number TEXT DEFAULT '',
-            photo_path TEXT DEFAULT ''
-        )
-    """)
-    conn.commit()
-    conn.close()
-    _db_initialized = True
+    pass
 
 
 @app.before_request
 def _ensure_db():
-    try:
-        _init_db()
-    except Exception as e:
-        print(f"DB INIT ERROR: {e}", flush=True)
+    pass
 
 
 @app.errorhandler(500)
@@ -222,11 +195,12 @@ def login():
     if request.method == "POST":
         username = request.form.get("username", "").strip()
         password = request.form.get("password", "")
-        conn = _get_db()
-        cur = conn.cursor()
-        cur.execute("SELECT id, password FROM users WHERE username = %s", (username,))
-        user = cur.fetchone()
-        conn.close()
+        data = _ler_users()
+        user = None
+        for u in data.get("users", []):
+            if u["username"] == username:
+                user = (u["id"], u["password"])
+                break
         if user and check_password_hash(user[1], password):
             session["user_id"] = user[0]
             session["username"] = username
@@ -249,18 +223,26 @@ def register():
             erro = "Senha deve ter pelo menos 4 caracteres."
         else:
             try:
-                conn = _get_db()
-                cur = conn.cursor()
-                cur.execute("INSERT INTO users (username, password) VALUES (%s, %s) RETURNING id",
-                            (username, generate_password_hash(password, method='pbkdf2:sha256')))
-                user_id = cur.fetchone()[0]
-                cur.execute("INSERT INTO user_settings (user_id) VALUES (%s)", (user_id,))
-                conn.commit()
-                conn.close()
+                data = _ler_users()
+                for u in data.get("users", []):
+                    if u["username"] == username:
+                        raise ValueError("duplicate")
+                user_id = max((u["id"] for u in data.get("users", [])), default=0) + 1
+                data.setdefault("users", []).append({
+                    "id": user_id,
+                    "username": username,
+                    "password": generate_password_hash(password, method='pbkdf2:sha256'),
+                })
+                data.setdefault("settings", {})[str(user_id)] = {
+                    "company_name": "",
+                    "whatsapp_number": "",
+                    "photo_path": "",
+                }
+                _salvar_users(data)
                 session["user_id"] = user_id
                 session["username"] = username
                 return redirect(url_for("dashboard"))
-            except psycopg2.IntegrityError:
+            except ValueError:
                 erro = "Usuário já existe."
     return render_template("register.html", erro=erro)
 
@@ -278,13 +260,8 @@ def logout():
 @login_required
 def settings():
     user_id = session["user_id"]
-    conn = _get_db()
-    cur = conn.cursor()
-    cur.execute("SELECT company_name, whatsapp_number, photo_path FROM user_settings WHERE user_id = %s",
-                (user_id,))
-    row = cur.fetchone()
-    conn.close()
-    s = {"company_name": row[0] or "", "whatsapp_number": row[1] or "", "photo_path": row[2] or ""} if row else {}
+    data = _ler_users()
+    s = data.get("settings", {}).get(str(user_id), {})
 
     erro = ""
     sucesso = ""
@@ -301,14 +278,13 @@ def settings():
             photo.save(dest)
             photo_path = f"/uploads/{filename}"
 
-        conn = _get_db()
-        cur = conn.cursor()
-        cur.execute("""
-            UPDATE user_settings SET company_name = %s, whatsapp_number = %s, photo_path = %s
-            WHERE user_id = %s
-        """, (company_name, whatsapp_number, photo_path, user_id))
-        conn.commit()
-        conn.close()
+        data = _ler_users()
+        data.setdefault("settings", {})[str(user_id)] = {
+            "company_name": company_name,
+            "whatsapp_number": whatsapp_number,
+            "photo_path": photo_path,
+        }
+        _salvar_users(data)
 
         s = {"company_name": company_name, "whatsapp_number": whatsapp_number, "photo_path": photo_path}
         sucesso = "Configurações salvas com sucesso."

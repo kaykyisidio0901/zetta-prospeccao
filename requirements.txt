@@ -3,4 +3,3 @@ reportlab
 werkzeug
 gunicorn
 playwright
-psycopg2-binary
