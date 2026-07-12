@@ -1,10 +1,12 @@
 services:
   - type: web
     name: zetta-funnel-pro
-    runtime: docker
+    runtime: python
     plan: free
+    buildCommand: pip install -r requirements.txt && playwright install --with-deps chromium
+    startCommand: gunicorn app:app
     envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.0"
       - key: SECRET_KEY
         generateValue: true
-      - key: DATABASE_URL
-        sync: false
