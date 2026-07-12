@@ -6,6 +6,8 @@ import re
 import sys
 import time
 import zipfile
+import urllib.request
+import urllib.parse
 from functools import wraps
 from flask import (Flask, render_template, request, jsonify, send_file,
                    send_from_directory, session, redirect, url_for)
@@ -45,22 +47,44 @@ app = Flask(__name__, template_folder=os.path.join(BASE_DIR, "templates"),
 app.secret_key = os.environ.get("SECRET_KEY", os.urandom(24).hex())
 
 ARQUIVO_DADOS = os.path.join(BASE_DIR, "dados_funnels.json")
-ARQUIVO_USERS = os.path.join(BASE_DIR, "users.json")
 UPLOAD_FOLDER = os.path.join(BASE_DIR, "uploads")
+
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "")
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 
-def _ler_users():
-    if not os.path.exists(ARQUIVO_USERS):
-        return {"users": [], "settings": {}}
-    with open(ARQUIVO_USERS, "r", encoding="utf-8") as f:
-        return json.load(f)
+def _sb_headers():
+    return {
+        "apikey": SUPABASE_KEY,
+        "Authorization": f"Bearer {SUPABASE_KEY}",
+        "Content-Type": "application/json",
+        "Prefer": "return=representation",
+    }
 
 
-def _salvar_users(data):
-    with open(ARQUIVO_USERS, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
+def _sb_get(table, params=""):
+    url = f"{SUPABASE_URL}/rest/v1/{table}?{params}"
+    req = urllib.request.Request(url, headers=_sb_headers())
+    with urllib.request.urlopen(req) as resp:
+        return json.loads(resp.read())
+
+
+def _sb_insert(table, data):
+    url = f"{SUPABASE_URL}/rest/v1/{table}"
+    body = json.dumps(data).encode()
+    req = urllib.request.Request(url, data=body, headers=_sb_headers(), method="POST")
+    with urllib.request.urlopen(req) as resp:
+        return json.loads(resp.read())
+
+
+def _sb_update(table, data, params):
+    url = f"{SUPABASE_URL}/rest/v1/{table}?{params}"
+    body = json.dumps(data).encode()
+    req = urllib.request.Request(url, data=body, headers=_sb_headers(), method="PATCH")
+    with urllib.request.urlopen(req) as resp:
+        return json.loads(resp.read())
 
 
 def _init_db():
@@ -195,14 +219,13 @@ def login():
     if request.method == "POST":
         username = request.form.get("username", "").strip()
         password = request.form.get("password", "")
-        data = _ler_users()
-        user = None
-        for u in data.get("users", []):
-            if u["username"] == username:
-                user = (u["id"], u["password"])
-                break
-        if user and check_password_hash(user[1], password):
-            session["user_id"] = user[0]
+        try:
+            users = _sb_get("users", f"username=eq.{urllib.parse.quote(username)}&select=id,password")
+            user = users[0] if users else None
+        except Exception:
+            user = None
+        if user and check_password_hash(user["password"], password):
+            session["user_id"] = user["id"]
             session["username"] = username
             return redirect(url_for("dashboard"))
         erro = "Usuário ou senha inválidos."
@@ -223,22 +246,20 @@ def register():
             erro = "Senha deve ter pelo menos 4 caracteres."
         else:
             try:
-                data = _ler_users()
-                for u in data.get("users", []):
-                    if u["username"] == username:
-                        raise ValueError("duplicate")
-                user_id = max((u["id"] for u in data.get("users", [])), default=0) + 1
-                data.setdefault("users", []).append({
-                    "id": user_id,
+                existing = _sb_get("users", f"username=eq.{urllib.parse.quote(username)}&select=id")
+                if existing:
+                    raise ValueError("duplicate")
+                result = _sb_insert("users", {
                     "username": username,
                     "password": generate_password_hash(password, method='pbkdf2:sha256'),
                 })
-                data.setdefault("settings", {})[str(user_id)] = {
+                user_id = result[0]["id"]
+                _sb_insert("user_settings", {
+                    "user_id": user_id,
                     "company_name": "",
                     "whatsapp_number": "",
                     "photo_path": "",
-                }
-                _salvar_users(data)
+                })
                 session["user_id"] = user_id
                 session["username"] = username
                 return redirect(url_for("dashboard"))
@@ -260,8 +281,11 @@ def logout():
 @login_required
 def settings():
     user_id = session["user_id"]
-    data = _ler_users()
-    s = data.get("settings", {}).get(str(user_id), {})
+    try:
+        rows = _sb_get("user_settings", f"user_id=eq.{user_id}&select=company_name,whatsapp_number,photo_path")
+        s = rows[0] if rows else {}
+    except Exception:
+        s = {}
 
     erro = ""
     sucesso = ""
@@ -278,13 +302,11 @@ def settings():
             photo.save(dest)
             photo_path = f"/uploads/{filename}"
 
-        data = _ler_users()
-        data.setdefault("settings", {})[str(user_id)] = {
+        _sb_update("user_settings", {
             "company_name": company_name,
             "whatsapp_number": whatsapp_number,
             "photo_path": photo_path,
-        }
-        _salvar_users(data)
+        }, f"user_id=eq.{user_id}")
 
         s = {"company_name": company_name, "whatsapp_number": whatsapp_number, "photo_path": photo_path}
         sucesso = "Configurações salvas com sucesso."
