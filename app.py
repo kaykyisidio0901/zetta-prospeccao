@@ -219,16 +219,21 @@ def login():
     if request.method == "POST":
         username = request.form.get("username", "").strip()
         password = request.form.get("password", "")
+        user = None
         try:
             users = _sb_get("users", f"username=eq.{urllib.parse.quote(username)}&select=id,password")
-            user = users[0] if users else None
-        except Exception:
-            user = None
+            if users and len(users) > 0:
+                user = users[0]
+        except Exception as e:
+            print(f"LOGIN ERROR: {e}", flush=True)
         if user and check_password_hash(user["password"], password):
             session["user_id"] = user["id"]
             session["username"] = username
             return redirect(url_for("dashboard"))
-        erro = "Usuário ou senha inválidos."
+        elif user:
+            erro = "Senha inválida."
+        else:
+            erro = "Usuário não encontrado."
     return render_template("login.html", erro=erro)
 
 
@@ -246,9 +251,6 @@ def register():
             erro = "Senha deve ter pelo menos 4 caracteres."
         else:
             try:
-                existing = _sb_get("users", f"username=eq.{urllib.parse.quote(username)}&select=id")
-                if existing:
-                    raise ValueError("duplicate")
                 result = _sb_insert("users", {
                     "username": username,
                     "password": generate_password_hash(password, method='pbkdf2:sha256'),
@@ -263,7 +265,7 @@ def register():
                 session["user_id"] = user_id
                 session["username"] = username
                 return redirect(url_for("dashboard"))
-            except ValueError:
+            except Exception:
                 erro = "Usuário já existe."
     return render_template("register.html", erro=erro)
 
