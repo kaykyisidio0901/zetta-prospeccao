@@ -3,7 +3,6 @@ import io
 import json
 import os
 import re
-import sqlite3
 import sys
 import time
 import zipfile
@@ -12,6 +11,8 @@ from flask import (Flask, render_template, request, jsonify, send_file,
                    send_from_directory, session, redirect, url_for)
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
+import psycopg2
+import psycopg2.extras
 
 try:
     from ia_motor import gerar_funil_vendas
@@ -46,10 +47,17 @@ app = Flask(__name__, template_folder=os.path.join(BASE_DIR, "templates"),
 app.secret_key = os.environ.get("SECRET_KEY", os.urandom(24).hex())
 
 ARQUIVO_DADOS = os.path.join(BASE_DIR, "dados_funnels.json")
-BANCO = os.path.join(BASE_DIR, "users.db")
+DATABASE_URL = os.environ.get("DATABASE_URL", "")
 UPLOAD_FOLDER = os.path.join(BASE_DIR, "uploads")
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+
+def _get_db():
+    conn = psycopg2.connect(DATABASE_URL)
+    conn.autocommit = False
+    return conn
+
 
 _db_initialized = False
 
@@ -58,23 +66,25 @@ def _init_db():
     global _db_initialized
     if _db_initialized:
         return
-    with sqlite3.connect(BANCO) as conn:
-        conn.execute("""
-            CREATE TABLE IF NOT EXISTS users (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                username TEXT UNIQUE NOT NULL,
-                password TEXT NOT NULL
-            )
-        """)
-        conn.execute("""
-            CREATE TABLE IF NOT EXISTS user_settings (
-                user_id INTEGER PRIMARY KEY,
-                company_name TEXT DEFAULT '',
-                whatsapp_number TEXT DEFAULT '',
-                photo_path TEXT DEFAULT '',
-                FOREIGN KEY (user_id) REFERENCES users(id)
-            )
-        """)
+    conn = _get_db()
+    cur = conn.cursor()
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            id SERIAL PRIMARY KEY,
+            username TEXT UNIQUE NOT NULL,
+            password TEXT NOT NULL
+        )
+    """)
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS user_settings (
+            user_id INTEGER PRIMARY KEY REFERENCES users(id),
+            company_name TEXT DEFAULT '',
+            whatsapp_number TEXT DEFAULT '',
+            photo_path TEXT DEFAULT ''
+        )
+    """)
+    conn.commit()
+    conn.close()
     _db_initialized = True
 
 
@@ -200,8 +210,11 @@ def login():
     if request.method == "POST":
         username = request.form.get("username", "").strip()
         password = request.form.get("password", "")
-        with sqlite3.connect(BANCO) as conn:
-            user = conn.execute("SELECT id, password FROM users WHERE username = ?", (username,)).fetchone()
+        conn = _get_db()
+        cur = conn.cursor()
+        cur.execute("SELECT id, password FROM users WHERE username = %s", (username,))
+        user = cur.fetchone()
+        conn.close()
         if user and check_password_hash(user[1], password):
             session["user_id"] = user[0]
             session["username"] = username
@@ -224,15 +237,18 @@ def register():
             erro = "Senha deve ter pelo menos 4 caracteres."
         else:
             try:
-                with sqlite3.connect(BANCO) as conn:
-                    cur = conn.execute("INSERT INTO users (username, password) VALUES (?, ?)",
-                                       (username, generate_password_hash(password, method='pbkdf2:sha256')))
-                    user_id = cur.lastrowid
-                    conn.execute("INSERT INTO user_settings (user_id) VALUES (?)", (user_id,))
+                conn = _get_db()
+                cur = conn.cursor()
+                cur.execute("INSERT INTO users (username, password) VALUES (%s, %s) RETURNING id",
+                            (username, generate_password_hash(password, method='pbkdf2:sha256')))
+                user_id = cur.fetchone()[0]
+                cur.execute("INSERT INTO user_settings (user_id) VALUES (%s)", (user_id,))
+                conn.commit()
+                conn.close()
                 session["user_id"] = user_id
                 session["username"] = username
                 return redirect(url_for("dashboard"))
-            except sqlite3.IntegrityError:
+            except psycopg2.IntegrityError:
                 erro = "Usuário já existe."
     return render_template("register.html", erro=erro)
 
@@ -250,9 +266,12 @@ def logout():
 @login_required
 def settings():
     user_id = session["user_id"]
-    with sqlite3.connect(BANCO) as conn:
-        row = conn.execute("SELECT company_name, whatsapp_number, photo_path FROM user_settings WHERE user_id = ?",
-                           (user_id,)).fetchone()
+    conn = _get_db()
+    cur = conn.cursor()
+    cur.execute("SELECT company_name, whatsapp_number, photo_path FROM user_settings WHERE user_id = %s",
+                (user_id,))
+    row = cur.fetchone()
+    conn.close()
     s = {"company_name": row[0] or "", "whatsapp_number": row[1] or "", "photo_path": row[2] or ""} if row else {}
 
     erro = ""
@@ -270,11 +289,14 @@ def settings():
             photo.save(dest)
             photo_path = f"/uploads/{filename}"
 
-        with sqlite3.connect(BANCO) as conn:
-            conn.execute("""
-                UPDATE user_settings SET company_name = ?, whatsapp_number = ?, photo_path = ?
-                WHERE user_id = ?
-            """, (company_name, whatsapp_number, photo_path, user_id))
+        conn = _get_db()
+        cur = conn.cursor()
+        cur.execute("""
+            UPDATE user_settings SET company_name = %s, whatsapp_number = %s, photo_path = %s
+            WHERE user_id = %s
+        """, (company_name, whatsapp_number, photo_path, user_id))
+        conn.commit()
+        conn.close()
 
         s = {"company_name": company_name, "whatsapp_number": whatsapp_number, "photo_path": photo_path}
         sucesso = "Configurações salvas com sucesso."
