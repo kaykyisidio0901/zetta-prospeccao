@@ -54,9 +54,12 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 
 def _get_db():
-    conn = psycopg2.connect(DATABASE_URL)
-    conn.autocommit = False
-    return conn
+    if not DATABASE_URL:
+        raise RuntimeError("DATABASE_URL não configurada. Adicione no painel do Render.")
+    url = DATABASE_URL
+    if "?" not in url:
+        url += "?sslmode=require"
+    return psycopg2.connect(url)
 
 
 _db_initialized = False
