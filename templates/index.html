@@ -424,7 +424,7 @@ function abrirWhatsApp(idx, telefone) {
     if (el) texto += el.value + '\n\n';
   }
   var url = 'https://web.whatsapp.com/send?phone=' + encodeURIComponent(telefone) + '&text=' + encodeURIComponent(texto.trim());
-  window.open(url, '_blank');
+  window.open(url, 'whatsapp');
 }
 
 function gerarReplica(idx, segmento) {
