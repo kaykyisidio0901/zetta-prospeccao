@@ -75,8 +75,13 @@ def _sb_insert(table, data):
     url = f"{SUPABASE_URL}/rest/v1/{table}"
     body = json.dumps(data).encode()
     req = urllib.request.Request(url, data=body, headers=_sb_headers(), method="POST")
-    with urllib.request.urlopen(req) as resp:
-        return json.loads(resp.read())
+    try:
+        with urllib.request.urlopen(req) as resp:
+            return json.loads(resp.read())
+    except urllib.error.HTTPError as e:
+        body = e.read().decode()
+        print(f"SB INSERT ERROR {table}: {e.code} {body}", flush=True)
+        raise
 
 
 def _sb_update(table, data, params):
@@ -265,8 +270,9 @@ def register():
                 session["user_id"] = user_id
                 session["username"] = username
                 return redirect(url_for("dashboard"))
-            except Exception:
-                erro = "Usuário já existe."
+            except Exception as e:
+                print(f"REGISTER ERROR: {e}", flush=True)
+                erro = "Erro ao cadastrar. Tente novamente."
     return render_template("register.html", erro=erro)
 
 
