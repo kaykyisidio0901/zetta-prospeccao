@@ -1,77 +1,105 @@
 import re
-import json
-import urllib.request
-import urllib.parse
+import random
+import time
+
+from playwright.sync_api import sync_playwright
 
 
-_HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/125.0.0.0 Safari/537.36",
-    "Accept-Language": "pt-BR,pt;q=0.9,en-US;q=0.8",
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-}
+_USER_AGENTS = [
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/125.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/123.0.0.0 Safari/537.36",
+]
+
+
+def _extrair_telefone_e_site(page):
+    telefone = ""
+    site = ""
+
+    try:
+        page.wait_for_selector('[aria-label^="Telefone:" i]', timeout=8000)
+        for el in page.query_selector_all('[aria-label^="Telefone:" i]'):
+            texto = el.get_attribute("aria-label") or ""
+            match = re.search(r"[\d\s()-]{8,}", texto)
+            if match:
+                telefone = re.sub(r"\D", "", match.group())
+                break
+    except Exception:
+        try:
+            page.wait_for_selector('button[data-item-id*="phone"]', timeout=5000)
+            for el in page.query_selector_all('button[data-item-id*="phone"]'):
+                aria = el.get_attribute("aria-label") or ""
+                match = re.search(r"[\d\s()-]{8,}", aria)
+                if match:
+                    telefone = re.sub(r"\D", "", match.group())
+                    break
+        except Exception:
+            texto_completo = page.inner_text("body")
+            match = re.search(r"\(\d{2}\)\s*\d{4,5}-\d{4}", texto_completo)
+            if match:
+                telefone = re.sub(r"\D", "", match.group())
+
+    for el in page.query_selector_all("a"):
+        href = el.get_attribute("href") or ""
+        txt = el.inner_text().strip()
+        if href.startswith(("http://", "https://")) and "google" not in href and "maps" not in href:
+            if txt and not href.endswith((".jpg", ".png", ".svg")):
+                site = href
+                break
+
+    return telefone, site
 
 
 def raspar_google_maps(url_busca: str, max_resultados=15):
     resultados = []
 
-    parsed = urllib.parse.urlparse(url_busca)
-    params = urllib.parse.parse_qs(parsed.query)
-    query = params.get("search", params.get("query", [""]))[0]
+    with sync_playwright() as pw:
+        browser = pw.chromium.launch(
+            headless=True,
+            args=["--no-sandbox", "--disable-blink-features=AutomationControlled"],
+        )
+        context = browser.new_context(
+            user_agent=random.choice(_USER_AGENTS),
+            viewport={"width": 1920, "height": 1080},
+            locale="pt-BR",
+        )
+        page = context.new_page()
 
-    if not query:
-        query = url_busca
+        page.goto(url_busca, timeout=40000)
+        page.wait_for_timeout(4000)
 
-    search_url = "https://www.google.com/maps/search/" + urllib.parse.quote(query)
-    req = urllib.request.Request(search_url, headers=_HEADERS)
+        for tentativa in range(6):
+            page.evaluate("window.scrollBy(0, 800)")
+            page.wait_for_timeout(1500 + int(random.random() * 1000))
 
-    try:
-        with urllib.request.urlopen(req, timeout=30) as resp:
-            html = resp.read().decode("utf-8", errors="replace")
-    except Exception as e:
-        raise RuntimeError(f"Erro ao acessar Google Maps: {e}")
+        cards = page.query_selector_all('a[href*="/maps/place/"]')
+        vistos = set()
+        links_coletados = []
 
-    pattern = r'\["(.*?)",\s*\[\[(?:\[.*?\],?\s*){1,2}(?:null|"[^"]*")\],?\s*"([^"]*)"[^,]*,\s*\[null,\s*\[(\d+\.\d+),\s*(\-?\d+\.\d+)\]'
-    matches = re.findall(pattern, html)
-
-    seen = set()
-    for nome, telefone_raw, lat, lng in matches:
-        if not nome or nome in seen or len(nome) < 2:
-            continue
-        if nome.startswith("http") or nome.startswith("/"):
-            continue
-        telefone = re.sub(r"\D", "", telefone_raw) if telefone_raw else ""
-        seen.add(nome)
-        resultados.append({
-            "nome": nome,
-            "telefone": telefone,
-            "site": "",
-            "lat": float(lat),
-            "lng": float(lng),
-        })
-        if len(resultados) >= max_resultados:
-            break
-
-    if not resultados:
-        data_pattern = r'\[null,null,(\d+\.?\d*),(\-?\d+\.?\d*)\]'
-        geo_matches = re.findall(data_pattern, html)
-
-        name_pattern = r'class="fontHeadlineSmall[^"]*"[^>]*>([^<]+)<'
-        names = re.findall(name_pattern, html)
-
-        phone_pattern = r'(?:\(\d{2}\)\s*\d{4,5}-\d{4}|\d{2}\s*\d{4,5}-\d{4})'
-        phones = re.findall(phone_pattern, html)
-
-        for i, nome in enumerate(names):
-            if not nome or nome in seen or len(nome) < 2:
+        for card in cards:
+            try:
+                nome = card.inner_text().strip().split("\n")[0].strip()
+                href = card.get_attribute("href") or ""
+                if nome and not nome.startswith("http") and href not in vistos:
+                    vistos.add(href)
+                    links_coletados.append((nome, href))
+            except Exception:
                 continue
-            seen.add(nome)
-            telefone = re.sub(r"\D", "", phones[i]) if i < len(phones) else ""
+
+        for nome, href in links_coletados[:max_resultados]:
+            try:
+                page.goto(href, timeout=20000, wait_until="domcontentloaded")
+                page.wait_for_timeout(3000)
+                telefone, site = _extrair_telefone_e_site(page)
+            except Exception:
+                telefone, site = "", ""
+
             resultados.append({
-                "nome": nome.strip(),
+                "nome": nome,
                 "telefone": telefone,
-                "site": "",
+                "site": site,
             })
-            if len(resultados) >= max_resultados:
-                break
+
+        browser.close()
 
     return resultados
