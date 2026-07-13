@@ -1,14 +1,16 @@
 services:
   - type: web
     name: zetta-funnel-pro
-    runtime: docker
+    runtime: python
     plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
     envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.0"
       - key: SECRET_KEY
         generateValue: true
       - key: SUPABASE_URL
         value: "https://sajqaovmsrocdwckhreq.supabase.co"
       - key: SUPABASE_KEY
         sync: false
-      - key: PLAYWRIGHT_BROWSERS_PATH
-        value: "/ms-playwright"
